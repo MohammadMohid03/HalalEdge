@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HalalEdge — AI-Powered Halal Stock Platform</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/home.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- ══════════ NAVBAR ══════════ -->
+<nav class="navbar">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-icon">☽</div>
+    <span>Halal<span class="accent">Edge</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Home</a></li>
+    <li><a href="screener.html">Screener</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="learn.html">Learn</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-ghost">Sign In</a>
+    <a href="signup.html" class="btn-primary">Get Started <i class="fa fa-arrow-right" style="font-size:0.75rem"></i></a>
+  </div>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="screener.html">Screener</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="learn.html">Learn</a>
+  <a href="about.html">About</a>
+  <div class="mobile-cta">
+    <a href="login.html" class="btn-outline">Sign In</a>
+    <a href="signup.html" class="btn-primary">Get Started</a>
+  </div>
+</div>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="orb orb-blue orb-1"></div>
+    <div class="orb orb-gold orb-2"></div>
+    <div class="orb orb-green orb-3"></div>
+  </div>
+
+  <div class="hero-inner">
+    <!-- Left -->
+    <div class="hero-content">
+      <div class="hero-label">
+        <div class="dot"></div>
+        AI-Powered · Shariah Certified · Real-Time Data
+      </div>
+      <h1>
+        Invest in Stocks<br>
+        <span class="line-gold">The Halal Way</span><br>
+        <span class="line-blue">With AI Precision</span>
+      </h1>
+      <p class="hero-desc">
+        HalalEdge combines 4 AI models to analyze stocks for both market performance and Shariah compliance — giving you confident, ethical investment decisions.
+      </p>
+      <div class="hero-actions">
+        <a href="signup.html" class="btn-gold btn-lg">Start Investing Free <i class="fa fa-arrow-right"></i></a>
+        <a href="screener.html" class="btn-outline btn-lg"><i class="fa fa-chart-line"></i> Browse Stocks</a>
+      </div>
+      <div class="hero-trust">
+        <div class="trust-item"><span class="trust-icon">✓</span> No credit card</div>
+        <div class="trust-divider"></div>
+        <div class="trust-item"><span class="trust-icon">✓</span> Shariah certified</div>
+        <div class="trust-divider"></div>
+        <div class="trust-item"><span class="trust-icon">✓</span> 100% free</div>
+      </div>
+    </div>
+
+    <!-- Right — floating card -->
+    <div class="hero-visual">
+      <div style="position:relative">
+        <div class="hero-card-main">
+          <div class="hero-card-header">
+            <div class="stock-identity">
+              <div class="stock-avatar">AAPL</div>
+              <div>
+                <div class="stock-name">Apple Inc.</div>
+                <div class="stock-full">NASDAQ: AAPL</div>
+              </div>
+            </div>
+            <span class="badge badge-halal">✓ Halal</span>
+          </div>
+          <div class="hero-chart-container">
+            <svg class="mini-chart" viewBox="0 0 300 100" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M0,80 L20,72 L40,68 L60,74 L80,60 L100,52 L120,58 L140,45 L160,38 L180,42 L200,30 L220,25 L240,20 L260,15 L280,10 L300,8"
+                fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M0,80 L20,72 L40,68 L60,74 L80,60 L100,52 L120,58 L140,45 L160,38 L180,42 L200,30 L220,25 L240,20 L260,15 L280,10 L300,8 L300,100 L0,100 Z"
+                fill="url(#chartGrad)"/>
+            </svg>
+          </div>
+          <div class="hero-price-row">
+            <div class="hero-price" id="heroPrice">$189.45</div>
+            <div class="hero-change">▲ +2.34%</div>
+          </div>
+          <div class="ai-verdict">
+            <div>
+              <div class="ai-verdict-label">AI VERDICT</div>
+              <div class="ai-verdict-value">STRONG BUY</div>
+            </div>
+            <div class="confidence-bar-wrap">
+              <div class="confidence-label">Confidence</div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" id="heroConf" style="width:0%"></div>
+              </div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:0.9rem;font-weight:700;color:var(--primary)">87%</div>
+          </div>
+        </div>
+
+        <!-- Floating badges -->
+        <div class="floating-badge floating-badge-1">
+          <div class="badge-dot green"></div>
+          <span style="color:var(--text-dim);font-size:0.75rem">Shariah Score</span>
+          <span style="color:var(--green);font-weight:700;font-family:var(--font-mono)">96/100</span>
+        </div>
+        <div class="floating-badge floating-badge-2">
+          <div class="badge-dot gold"></div>
+          <span style="color:var(--text-dim);font-size:0.75rem">AI Confidence</span>
+          <span style="color:var(--gold);font-weight:700;font-family:var(--font-mono)">87%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ LIVE TICKER ══════════ -->
+<div class="ticker-section">
+  <div class="ticker-label"><i class="fa fa-circle" style="color:var(--green);font-size:0.5rem"></i> LIVE</div>
+  <div class="ticker-track" id="ticker">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- ══════════ STATS ══════════ -->
+<section class="stats-section">
+  <div class="stats-inner reveal">
+    <div class="stat-item">
+      <div class="stat-icon">📈</div>
+      <div class="stat-value" data-counter data-target="2400" data-suffix="+">0</div>
+      <div class="stat-label">Halal Stocks Analyzed</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">🤖</div>
+      <div class="stat-value" data-counter data-target="4" data-suffix=" AI Models">0</div>
+      <div class="stat-label">Working Together</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-value" data-counter data-target="91" data-suffix="%" data-decimals="0">0</div>
+      <div class="stat-label">Prediction Accuracy</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon">🌍</div>
+      <div class="stat-value" data-counter data-target="47" data-suffix=" Markets">0</div>
+      <div class="stat-label">Global Coverage</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="features-section">
+  <div class="features-inner">
+    <div class="features-header reveal">
+      <div class="section-label">Why HalalEdge</div>
+      <h2 class="section-title">Everything You Need to<br><span class="highlight">Invest With Confidence</span></h2>
+      <p class="section-subtitle">A full-stack Islamic investment platform powered by cutting-edge AI models and real-time market data.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1" style="--accent-color:var(--primary)">
+        <div class="feature-icon blue">🤖</div>
+        <h3>4-Model AI Pipeline</h3>
+        <p>LSTM price prediction, BERT sentiment analysis, Shariah filter, and XGBoost ensemble scorer working in harmony for max accuracy.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2" style="--accent-color:var(--gold)">
+        <div class="feature-icon gold">☽</div>
+        <h3>Real-Time Shariah Screening</h3>
+        <p>Every stock screened against AAOIFI standards. Debt ratios, haram revenue %, and business activity checked automatically.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3" style="--accent-color:var(--green)">
+        <div class="feature-icon green">📊</div>
+        <h3>Live Market Data</h3>
+        <p>Real-time prices, volume, market cap and financial ratios updated continuously via integrated market APIs.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1" style="--accent-color:#a855f7">
+        <div class="feature-icon purple">🧠</div>
+        <h3>Sentiment Intelligence</h3>
+        <p>News headlines, social signals and analyst reports analyzed by NLP models to gauge market mood before you invest.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2" style="--accent-color:var(--red)">
+        <div class="feature-icon red">⚠️</div>
+        <h3>Risk Assessment</h3>
+        <p>Volatility scoring, beta analysis, and downside risk calculations presented clearly so you always know what you're getting into.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3" style="--accent-color:#14b8a6">
+        <div class="feature-icon teal">💼</div>
+        <h3>Portfolio Simulator</h3>
+        <p>Build and track a simulated halal portfolio. Monitor P&L, diversification, and sector allocation in real-time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="hiw-section">
+  <div class="hiw-inner">
+    <div class="hiw-header reveal">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">From Data to <span class="highlight">Halal Decision</span></h2>
+    </div>
+    <div class="hiw-steps">
+      <div class="hiw-step reveal reveal-delay-1">
+        <div class="step-num">01</div>
+        <h3>Data Ingestion</h3>
+        <p>We pull live prices, financial statements, and news from global market feeds every minute.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-2">
+        <div class="step-num">02</div>
+        <h3>AI Analysis</h3>
+        <p>4 specialized models run in parallel — price trends, sentiment, compliance, and ensemble scoring.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-3">
+        <div class="step-num">03</div>
+        <h3>Shariah Filter</h3>
+        <p>Every result is cross-checked against Islamic finance criteria before any recommendation is made.</p>
+      </div>
+      <div class="hiw-step reveal reveal-delay-4">
+        <div class="step-num">04</div>
+        <h3>Your Decision</h3>
+        <p>You get a clear BUY / HOLD / AVOID verdict with full transparency on how we got there.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ AI MODELS ══════════ -->
+<section class="ai-section">
+  <div class="ai-inner container">
+    <div>
+      <div class="section-label reveal">AI Architecture</div>
+      <h2 class="section-title reveal">4 Models. <span class="highlight">One Verdict.</span></h2>
+      <p class="section-subtitle reveal" style="margin:0.75rem 0 2rem">Each model is a specialist. Together they form an ensemble that no single model could match alone.</p>
+
+      <div class="ai-models">
+        <div class="ai-model-card reveal reveal-delay-1">
+          <div class="model-num">M1</div>
+          <div class="model-info">
+            <div class="model-name">LSTM — Price Trend Predictor</div>
+            <div class="model-desc">Learns from 5 years of historical price patterns to forecast short-term direction</div>
+          </div>
+          <span class="badge badge-buy model-badge">40% weight</span>
+        </div>
+        <div class="arrow-down reveal">↓</div>
+        <div class="ai-model-card reveal reveal-delay-2">
+          <div class="model-num">M2</div>
+          <div class="model-info">
+            <div class="model-name">DistilBERT — Sentiment Analyzer</div>
+            <div class="model-desc">Reads thousands of news headlines to score market sentiment in real-time</div>
+          </div>
+          <span class="badge badge-hold model-badge">30% weight</span>
+        </div>
+        <div class="arrow-down reveal">↓</div>
+        <div class="ai-model-card reveal reveal-delay-3">
+          <div class="model-num">M3</div>
+          <div class="model-info">
+            <div class="model-name">Shariah Filter — Compliance Engine</div>
+            <div class="model-desc">Validates debt ratios, haram revenue %, and business type classification</div>
+          </div>
+          <span class="badge badge-halal model-badge">Gate</span>
+        </div>
+        <div class="arrow-down reveal">↓</div>
+        <div class="ai-model-card reveal reveal-delay-4">
+          <div class="model-num">M4</div>
+          <div class="model-info">
+            <div class="model-name">XGBoost — Ensemble Scorer</div>
+            <div class="model-desc">Combines all signals into a final BUY / HOLD / AVOID verdict with confidence %</div>
+          </div>
+          <span class="badge badge-buy model-badge">Final</span>
+        </div>
+        <div class="arrow-down reveal">↓</div>
+        <div class="pipeline-output reveal">
+          <div class="output-icon">✅</div>
+          <div>
+            <div class="output-text">BUY — 87% Confidence</div>
+            <div class="output-sub">Halal · Strong Fundamentals · Positive Sentiment</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right visual card -->
+    <div class="ai-visual-card reveal">
+      <defs>
+        <linearGradient id="ringGradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#0ea5e9"/>
+          <stop offset="100%" stop-color="#10b981"/>
+        </linearGradient>
+      </defs>
+      <div class="analysis-header">
+        <div class="analysis-title">📊 Live Analysis — MSFT</div>
+        <span class="badge badge-halal">✓ Halal</span>
+      </div>
+
+      <div class="analysis-scores">
+        <div class="score-row">
+          <div class="score-label-row">
+            <span class="score-label">Price Trend (LSTM)</span>
+            <span class="score-val" style="color:var(--primary)">82/100</span>
+          </div>
+          <div class="score-track"><div class="score-fill blue" data-width="82"></div></div>
+        </div>
+        <div class="score-row">
+          <div class="score-label-row">
+            <span class="score-label">Sentiment (BERT)</span>
+            <span class="score-val" style="color:var(--gold)">74/100</span>
+          </div>
+          <div class="score-track"><div class="score-fill gold" data-width="74"></div></div>
+        </div>
+        <div class="score-row">
+          <div class="score-label-row">
+            <span class="score-label">Shariah Compliance</span>
+            <span class="score-val" style="color:var(--green)">95/100</span>
+          </div>
+          <div class="score-track"><div class="score-fill green" data-width="95"></div></div>
+        </div>
+        <div class="score-row">
+          <div class="score-label-row">
+            <span class="score-label">Ensemble Score</span>
+            <span class="score-val" style="color:var(--white)">84/100</span>
+          </div>
+          <div class="score-track"><div class="score-fill blue" data-width="84"></div></div>
+        </div>
+      </div>
+
+      <div class="final-verdict">
+        <div>
+          <div class="verdict-label">FINAL VERDICT</div>
+          <div class="verdict-value">STRONG BUY ↑</div>
+        </div>
+        <div style="text-align:right">
+          <div class="verdict-label">CONFIDENCE</div>
+          <div class="verdict-confidence">87%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;padding:0.875rem;background:rgba(255,255,255,0.02);border-radius:var(--radius);border:1px solid var(--border)">
+        <div style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:0.5rem">RISK METRICS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div style="font-size:0.78rem"><span style="color:var(--text-muted)">Beta: </span><span style="color:var(--white);font-family:var(--font-mono)">0.89</span></div>
+          <div style="font-size:0.78rem"><span style="color:var(--text-muted)">P/E: </span><span style="color:var(--white);font-family:var(--font-mono)">32.1x</span></div>
+          <div style="font-size:0.78rem"><span style="color:var(--text-muted)">52W: </span><span style="color:var(--green);font-family:var(--font-mono)">+28.4%</span></div>
+          <div style="font-size:0.78rem"><span style="color:var(--text-muted)">Vol: </span><span style="color:var(--white);font-family:var(--font-mono)">18.2M</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TOP PICKS ══════════ -->
+<section class="picks-section">
+  <div class="picks-inner">
+    <div class="picks-header">
+      <div>
+        <div class="section-label">AI Top Picks</div>
+        <h2 class="section-title">Today's <span class="highlight">Best Halal Stocks</span></h2>
+      </div>
+      <div class="picks-tabs">
+        <div class="picks-tab active" data-tab="buy" onclick="filterPicks('buy',this)">BUY</div>
+        <div class="picks-tab" data-tab="hold" onclick="filterPicks('hold',this)">HOLD</div>
+        <div class="picks-tab" data-tab="all" onclick="filterPicks('all',this)">All</div>
+      </div>
+    </div>
+    <div class="stock-cards-grid" id="stockGrid">
+      <!-- filled by JS -->
+    </div>
+    <div style="text-align:center;margin-top:2rem">
+      <a href="screener.html" class="btn-outline btn-lg">View All 2,400+ Stocks <i class="fa fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SHARIAH ══════════ -->
+<section class="shariah-section">
+  <div class="shariah-inner container">
+    <div>
+      <div class="section-label reveal">Shariah Compliance</div>
+      <h2 class="section-title reveal">Investing That Aligns<br><span class="highlight">With Your Values</span></h2>
+      <p class="section-subtitle reveal" style="margin:0.75rem 0 0">Our compliance engine checks every stock against AAOIFI standards — the global benchmark for Islamic finance.</p>
+      <div class="shariah-criteria">
+        <div class="criterion reveal reveal-delay-1">
+          <div class="criterion-icon">💰</div>
+          <div>
+            <div class="criterion-title">Debt Ratio ≤ 33%</div>
+            <div class="criterion-desc">Total interest-bearing debt must not exceed 33% of total assets</div>
+          </div>
+        </div>
+        <div class="criterion reveal reveal-delay-2">
+          <div class="criterion-icon">🚫</div>
+          <div>
+            <div class="criterion-title">Haram Revenue ≤ 5%</div>
+            <div class="criterion-desc">Revenue from prohibited activities (alcohol, gambling, pork, weapons) must be minimal</div>
+          </div>
+        </div>
+        <div class="criterion reveal reveal-delay-3">
+          <div class="criterion-icon">🏢</div>
+          <div>
+            <div class="criterion-title">Business Activity Check</div>
+            <div class="criterion-desc">Core business must not be in conventional banking, insurance, or other haram sectors</div>
+          </div>
+        </div>
+        <div class="criterion reveal reveal-delay-4">
+          <div class="criterion-icon">📋</div>
+          <div>
+            <div class="criterion-title">Receivables Ratio ≤ 49%</div>
+            <div class="criterion-desc">Accounts receivable and liquid assets kept within permissible thresholds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="shariah-visual">
+        <div style="text-align:center;margin-bottom:1.25rem">
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--white);margin-bottom:4px">Compliance Overview</div>
+          <div style="font-size:0.78rem;color:var(--text-muted)">Apple Inc. — AAPL</div>
+        </div>
+
+        <div class="compliance-ring">
+          <svg viewBox="0 0 180 180" width="180" height="180">
+            <defs>
+              <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#0ea5e9"/>
+                <stop offset="100%" stop-color="#10b981"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="90" cy="90" r="80"/>
+            <circle class="ring-fill" id="ringFill" cx="90" cy="90" r="80"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-percent">96</div>
+            <div class="ring-label">Score</div>
+          </div>
+        </div>
+
+        <div class="compliance-items">
+          <div class="compliance-item">
+            <div class="compliance-item-label"><div class="dot" style="background:var(--green)"></div>Debt Ratio</div>
+            <div class="compliance-item-value pass">14.2% ✓</div>
+          </div>
+          <div class="compliance-item">
+            <div class="compliance-item-label"><div class="dot" style="background:var(--green)"></div>Haram Revenue</div>
+            <div class="compliance-item-value pass">0.0% ✓</div>
+          </div>
+          <div class="compliance-item">
+            <div class="compliance-item-label"><div class="dot" style="background:var(--green)"></div>Business Activity</div>
+            <div class="compliance-item-value pass">Tech ✓</div>
+          </div>
+          <div class="compliance-item">
+            <div class="compliance-item-label"><div class="dot" style="background:var(--gold)"></div>Receivables Ratio</div>
+            <div class="compliance-item-value warn">38.1% ⚠</div>
+          </div>
+          <div class="compliance-item" style="margin-top:0.5rem;padding-top:0.75rem;border-top:1px solid var(--border)">
+            <div class="compliance-item-label" style="font-weight:700;color:var(--white)">Overall Status</div>
+            <span class="badge badge-halal">✓ HALAL</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta-section">
+  <div class="cta-inner reveal">
+    <div class="orb orb-blue orb-1"></div>
+    <div class="orb orb-gold orb-2"></div>
+    <div class="section-label" style="justify-content:center">Start Today</div>
+    <h2>Ready to Invest the <span class="highlight">Halal Way?</span></h2>
+    <p>Join thousands of Muslim investors using AI to make smarter, Shariah-compliant investment decisions — completely free.</p>
+    <div class="cta-actions">
+      <a href="signup.html" class="btn-gold btn-lg">Create Free Account <i class="fa fa-arrow-right"></i></a>
+      <a href="screener.html" class="btn-outline btn-lg">Explore Screener</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo" style="margin-bottom:0.5rem;display:inline-flex">
+        <div class="logo-icon">☽</div>
+        <span>Halal<span class="accent">Edge</span></span>
+      </a>
+      <p>AI-powered Halal stock analysis platform. Making ethical, Shariah-compliant investing accessible to every Muslim investor worldwide.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a href="screener.html">Stock Screener</a></li>
+        <li><a href="portfolio.html">Portfolio</a></li>
+        <li><a href="stock.html">AI Predictions</a></li>
+        <li><a href="learn.html">Education</a></li>
+        <li><a href="about.html">About</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <ul>
+        <li><a href="learn.html#what-is-halal">Halal Investing 101</a></li>
+        <li><a href="learn.html#shariah">Shariah Standards</a></li>
+        <li><a href="learn.html#faq">FAQ</a></li>
+        <li><a href="learn.html#glossary">Glossary</a></li>
+        <li><a href="about.html#ai">How AI Works</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul class="footer-contact">
+        <li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li>
+        <li><span class="icon"><i class="fa fa-map-marker"></i></span>Karachi, Pakistan</li>
+        <li><span class="icon"><i class="fa fa-phone"></i></span>+92 300 000 0000</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 HalalEdge. All rights reserved. Not financial advice.</span>
+    <div class="halal-badge">☽ Shariah Certified Platform</div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/home.js"></script>
+</body>
+</html>

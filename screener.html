@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stock Screener — HalalEdge</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/screener.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="screener.html" class="active">Screener</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="learn.html">Learn</a></li>
+    <li><a href="about.html">About</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="login.html" class="btn-ghost">Sign In</a>
+    <a href="signup.html" class="btn-primary">Get Started</a>
+  </div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a><a href="screener.html">Screener</a><a href="portfolio.html">Portfolio</a><a href="learn.html">Learn</a><a href="about.html">About</a>
+  <div class="mobile-cta"><a href="login.html" class="btn-outline">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+</div>
+
+<div class="page-wrapper">
+  <!-- Hero -->
+  <div class="screener-hero">
+    <div class="screener-hero-inner">
+      <div class="section-label">AI Stock Screener</div>
+      <h1>Find Your Next <span class="highlight">Halal Investment</span></h1>
+      <p>Screen 2,400+ stocks by AI prediction score, Shariah compliance, sector, and more.</p>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-bar-inner">
+      <div class="search-box">
+        <i class="fa fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search symbol or company…"/>
+      </div>
+      <select class="filter-select" id="sectorFilter">
+        <option value="">All Sectors</option>
+        <option>Technology</option>
+        <option>Healthcare</option>
+        <option>Consumer</option>
+        <option>Industrials</option>
+        <option>Energy</option>
+        <option>Financials</option>
+        <option>Materials</option>
+        <option>Real Estate</option>
+      </select>
+      <select class="filter-select" id="marketFilter">
+        <option value="">All Markets</option>
+        <option>NASDAQ</option>
+        <option>NYSE</option>
+        <option>LSE</option>
+        <option>Tadawul</option>
+      </select>
+      <div class="filter-btn-group">
+        <div class="filter-btn active" onclick="setCompliance('all',this)">All</div>
+        <div class="filter-btn" onclick="setCompliance('halal',this)">✓ Halal</div>
+        <div class="filter-btn" onclick="setCompliance('doubtful',this)">⚠ Doubtful</div>
+      </div>
+      <span class="results-count">Showing <span id="countNum">24</span> of 2,400+</span>
+      <div class="view-toggle">
+        <div class="view-btn active" id="tableViewBtn" onclick="setView('table',this)" title="Table"><i class="fa fa-list"></i></div>
+        <div class="view-btn" id="gridViewBtn" onclick="setView('grid',this)" title="Grid"><i class="fa fa-th"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="screener-body">
+    <!-- Sidebar -->
+    <aside class="screener-sidebar">
+      <div class="sidebar-title">Filters <span class="sidebar-reset" onclick="resetFilters()">Reset all</span></div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">AI Verdict</div>
+        <div class="checkbox-list">
+          <div class="checkbox-item"><input type="checkbox" id="fBuy" checked><label for="fBuy">BUY</label><span class="count">842</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="fHold" checked><label for="fHold">HOLD</label><span class="count">1104</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="fAvoid"><label for="fAvoid">AVOID</label><span class="count">454</span></div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Sector</div>
+        <div class="checkbox-list">
+          <div class="checkbox-item"><input type="checkbox" id="sTech" checked><label for="sTech">Technology</label><span class="count">623</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="sHealth" checked><label for="sHealth">Healthcare</label><span class="count">318</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="sConsumer" checked><label for="sConsumer">Consumer</label><span class="count">241</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="sEnergy" checked><label for="sEnergy">Energy</label><span class="count">187</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="sIndustrial" checked><label for="sIndustrial">Industrials</label><span class="count">212</span></div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Min. AI Score</div>
+        <div class="range-slider">
+          <input type="range" min="0" max="100" value="60" id="scoreRange" oninput="document.getElementById('scoreVal').textContent=this.value+'%'"/>
+          <div class="range-labels"><span>0%</span><span id="scoreVal">60%</span><span>100%</span></div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Market Cap</div>
+        <div class="checkbox-list">
+          <div class="checkbox-item"><input type="checkbox" id="mcLarge" checked><label for="mcLarge">Large Cap (&gt;$10B)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="mcMid" checked><label for="mcMid">Mid Cap ($2B-$10B)</label></div>
+          <div class="checkbox-item"><input type="checkbox" id="mcSmall"><label for="mcSmall">Small Cap (&lt;$2B)</label></div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <div class="filter-group-label">Shariah Status</div>
+        <div class="checkbox-list">
+          <div class="checkbox-item"><input type="checkbox" id="shHalal" checked><label for="shHalal">✓ Halal</label><span class="count">1946</span></div>
+          <div class="checkbox-item"><input type="checkbox" id="shDoubt"><label for="shDoubt">⚠ Doubtful</label><span class="count">454</span></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="width:100%;justify-content:center;margin-top:0.5rem" onclick="applyFilters()">
+        <i class="fa fa-filter"></i> Apply Filters
+      </button>
+    </aside>
+
+    <!-- Main -->
+    <div class="screener-main">
+      <div class="table-header">
+        <div class="sort-tabs">
+          <div class="sort-tab active" onclick="setSortTab(this,'score')"><i class="fa fa-robot"></i> AI Score</div>
+          <div class="sort-tab" onclick="setSortTab(this,'gainers')"><i class="fa fa-arrow-up"></i> Top Gainers</div>
+          <div class="sort-tab" onclick="setSortTab(this,'losers')"><i class="fa fa-arrow-down"></i> Losers</div>
+          <div class="sort-tab" onclick="setSortTab(this,'volume')"><i class="fa fa-chart-bar"></i> Volume</div>
+          <div class="sort-tab" onclick="setSortTab(this,'marketcap')"><i class="fa fa-building"></i> Market Cap</div>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="stocks-table-wrap" id="tableView">
+        <table class="stocks-table">
+          <thead>
+            <tr>
+              <th onclick="sortTable('symbol')">Stock <span class="sort-icon">⇅</span></th>
+              <th onclick="sortTable('price')">Price <span class="sort-icon">⇅</span></th>
+              <th onclick="sortTable('change')">24h % <span class="sort-icon">⇅</span></th>
+              <th>Trend</th>
+              <th onclick="sortTable('aiScore')">AI Score <span class="sort-icon">⇅</span></th>
+              <th>Verdict</th>
+              <th>Shariah</th>
+              <th onclick="sortTable('marketcap')">Mkt Cap <span class="sort-icon">⇅</span></th>
+              <th>Sector</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Grid View -->
+      <div class="stocks-card-grid hidden" id="gridView"></div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+      <p>AI-powered Halal stock analysis platform for Muslim investors worldwide.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Platform</h4><ul><li><a href="screener.html">Stock Screener</a></li><li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul class="footer-contact"><li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li><li><span class="icon"><i class="fa fa-map-marker"></i></span>Karachi, Pakistan</li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Disclaimer</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 HalalEdge. Not financial advice.</span><div class="halal-badge">☽ Shariah Certified</div></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/screener.js"></script>
+</body>
+</html>

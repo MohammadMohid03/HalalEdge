@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — HalalEdge</title>
+  <link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/about.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="screener.html">Screener</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html" class="active">About</a></li>
+  </ul>
+  <div class="nav-cta"><a href="login.html" class="btn-ghost">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a><a href="screener.html">Screener</a><a href="portfolio.html">Portfolio</a><a href="learn.html">Learn</a><a href="about.html">About</a>
+  <div class="mobile-cta"><a href="login.html" class="btn-outline">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- Hero -->
+  <div class="about-hero">
+    <div class="orb orb-blue" style="width:500px;height:500px;top:-150px;right:-100px;opacity:0.2"></div>
+    <div class="orb orb-gold" style="width:350px;height:350px;bottom:-100px;left:-80px;opacity:0.15"></div>
+    <div class="about-hero-inner reveal">
+      <div class="section-label" style="justify-content:center">Our Story</div>
+      <h1>Built for the<br><span class="highlight">Muslim Investor</span></h1>
+      <p>HalalEdge was born from a simple frustration — finding halal investment opportunities shouldn't require a finance degree or a Shariah scholar on speed dial. We built the tool we wished existed.</p>
+    </div>
+  </div>
+
+  <!-- Mission -->
+  <div class="about-section">
+    <div class="about-section-inner">
+      <div class="mission-grid">
+        <div class="mission-text">
+          <div class="section-label reveal">Our Mission</div>
+          <h2 class="section-title reveal">Making Halal Investing<br><span class="highlight">Accessible to All</span></h2>
+          <p class="reveal" style="margin-top:1rem">There are 1.8 billion Muslims worldwide, yet the tools available for halal stock investing are primitive, expensive, or non-existent. Most Muslim investors either avoid the stock market entirely or invest blindly, unaware of their portfolios' Shariah compliance.</p>
+          <p class="reveal">HalalEdge changes that. We combine cutting-edge AI with rigorous Islamic finance principles to give every Muslim investor — regardless of income or expertise — the tools to invest with confidence, clarity, and conscience.</p>
+          <p class="reveal">This platform is completely free because we believe access to ethical investing tools should not be a privilege of the wealthy. It is a right for every Muslim investor globally.</p>
+          <div class="reveal" style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+            <a href="signup.html" class="btn-primary btn-lg">Join the Community</a>
+            <a href="learn.html" class="btn-outline btn-lg">Start Learning</a>
+          </div>
+        </div>
+        <div class="reveal">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--white)" data-counter data-target="2400" data-suffix="+">0</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Stocks Screened</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--gold)" data-counter data-target="91" data-suffix="%">0</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">AI Accuracy</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--green)">4</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">AI Models</div>
+            </div>
+            <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center">
+              <div style="font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--primary)">100%</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px">Free Forever</div>
+            </div>
+          </div>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;margin-top:1rem">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.875rem">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--halal-bg);display:flex;align-items:center;justify-content:center;font-size:1.1rem">☽</div>
+              <div style="font-weight:700;color:var(--white)">Shariah Advisory</div>
+            </div>
+            <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.65">Our compliance engine follows AAOIFI standards — the same framework used by major Islamic banks globally. All filters and thresholds have been reviewed against contemporary Islamic finance scholarship.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Values -->
+  <div class="about-section">
+    <div class="about-section-inner">
+      <div style="text-align:center;margin-bottom:3rem">
+        <div class="section-label reveal" style="justify-content:center">What We Stand For</div>
+        <h2 class="section-title reveal">Our Core <span class="highlight">Values</span></h2>
+      </div>
+      <div class="values-grid">
+        <div class="value-card reveal reveal-delay-1">
+          <div class="value-icon">🕌</div>
+          <div class="value-title">Faith First</div>
+          <div class="value-desc">Shariah compliance is never a feature — it is the foundation. Every decision we make starts with "is this permissible?"</div>
+        </div>
+        <div class="value-card reveal reveal-delay-2">
+          <div class="value-icon">🔓</div>
+          <div class="value-title">Radical Openness</div>
+          <div class="value-desc">We are completely free, forever. Financial tools should not be luxury goods. Every Muslim investor deserves the same quality of analysis.</div>
+        </div>
+        <div class="value-card reveal reveal-delay-3">
+          <div class="value-icon">🔬</div>
+          <div class="value-title">Scientific Rigour</div>
+          <div class="value-desc">Our AI models are tested, backtested, and held to academic standards. We never claim certainty — we claim honest probability.</div>
+        </div>
+        <div class="value-card reveal reveal-delay-1">
+          <div class="value-icon">🌍</div>
+          <div class="value-title">Global Perspective</div>
+          <div class="value-desc">Muslim investors live everywhere — Pakistan, UK, USA, GCC, Malaysia, Nigeria. We build for all of them, not just one market.</div>
+        </div>
+        <div class="value-card reveal reveal-delay-2">
+          <div class="value-icon">🤝</div>
+          <div class="value-title">Community Driven</div>
+          <div class="value-desc">Built by Muslims, for Muslims. We listen to our community — your feedback shapes our roadmap, features, and priorities.</div>
+        </div>
+        <div class="value-card reveal reveal-delay-3">
+          <div class="value-icon">🛡️</div>
+          <div class="value-title">Honest Disclosure</div>
+          <div class="value-desc">We are not financial advisors. We are a tool. We always tell you exactly how confident the AI is, and why it reached its conclusion.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team -->
+  <div class="about-section" style="background:var(--bg-2)">
+    <div class="about-section-inner">
+      <div style="text-align:center;margin-bottom:3rem">
+        <div class="section-label reveal" style="justify-content:center">The Team</div>
+        <h2 class="section-title reveal">Built by <span class="highlight">Passionate Developers</span></h2>
+        <p class="section-subtitle reveal" style="margin:0.75rem auto 0;text-align:center">A group of Muslim developers and students who wanted to solve a real problem for the ummah.</p>
+      </div>
+      <div class="team-grid">
+        <div class="team-card reveal reveal-delay-1">
+          <div class="team-avatar" style="background:linear-gradient(135deg,rgba(14,165,233,0.2),rgba(14,165,233,0.1))">👨‍💻</div>
+          <div class="team-name">Ahmed Khan</div>
+          <div class="team-role">Lead Developer</div>
+          <div class="team-bio">Full-stack developer passionate about fintech and Islamic finance. Architected the AI pipeline and backend systems.</div>
+        </div>
+        <div class="team-card reveal reveal-delay-2">
+          <div class="team-avatar" style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.1))">👨‍🎨</div>
+          <div class="team-name">Umar Siddiqui</div>
+          <div class="team-role">UI/UX Designer</div>
+          <div class="team-bio">Designer with a background in fintech products. Built the design system and all user interface components from scratch.</div>
+        </div>
+        <div class="team-card reveal reveal-delay-3">
+          <div class="team-avatar" style="background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(16,185,129,0.1))">👨‍🔬</div>
+          <div class="team-name">Bilal Rehman</div>
+          <div class="team-role">AI/ML Engineer</div>
+          <div class="team-bio">Machine learning specialist who trained and optimized the LSTM and XGBoost models. Computer Science final year student.</div>
+        </div>
+        <div class="team-card reveal reveal-delay-4">
+          <div class="team-avatar" style="background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(139,92,246,0.1))">👨‍📊</div>
+          <div class="team-name">Zaid Malik</div>
+          <div class="team-role">Finance & Shariah</div>
+          <div class="team-bio">Islamic finance student who ensured all compliance criteria align with AAOIFI standards and contemporary scholarship.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Architecture -->
+  <div class="about-section" id="ai">
+    <div class="about-section-inner">
+      <div style="text-align:center;margin-bottom:3rem">
+        <div class="section-label reveal" style="justify-content:center">Technology</div>
+        <h2 class="section-title reveal">The AI Behind <span class="highlight">HalalEdge</span></h2>
+      </div>
+      <div class="ai-arch-card reveal">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2rem">
+          <div style="text-align:center">
+            <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--primary-dark),var(--primary));display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;font-family:var(--font-mono);font-weight:800;color:white;font-size:0.85rem">LSTM</div>
+            <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px">Price Predictor</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">5Y historical data</div>
+            <div style="font-size:0.75rem;color:var(--primary);font-family:var(--font-mono);margin-top:4px">40% weight</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#d97706,var(--gold));display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;font-family:var(--font-mono);font-weight:800;color:white;font-size:0.78rem">BERT</div>
+            <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px">Sentiment NLP</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">Real-time news feed</div>
+            <div style="font-size:0.75rem;color:var(--gold);font-family:var(--font-mono);margin-top:4px">30% weight</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,var(--halal-green),var(--green));display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;font-family:var(--font-mono);font-weight:800;color:white;font-size:0.72rem">SHARIA</div>
+            <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px">Compliance Gate</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">AAOIFI standards</div>
+            <div style="font-size:0.75rem;color:var(--green);font-family:var(--font-mono);margin-top:4px">Hard gate</div>
+          </div>
+          <div style="text-align:center">
+            <div style="width:60px;height:60px;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 0.875rem;font-family:var(--font-mono);font-weight:800;color:white;font-size:0.78rem">XGB</div>
+            <div style="font-weight:700;color:var(--white);font-size:0.9rem;margin-bottom:4px">Ensemble Scorer</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">Final verdict</div>
+            <div style="font-size:0.75rem;color:#8b5cf6;font-family:var(--font-mono);margin-top:4px">Output layer</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:left">
+          <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--primary);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.1em">Pipeline Flow</div>
+          <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.9">
+            <span style="color:var(--primary)">Raw Data</span> → LSTM Price Score + BERT Sentiment Score → <span style="color:var(--green)">Shariah Gate</span> (Pass/Fail) → XGBoost Ensemble → <span style="color:var(--white);font-weight:700">BUY / HOLD / AVOID + Confidence %</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="about-section" style="background:var(--bg-2)">
+    <div class="about-section-inner">
+      <div style="text-align:center;margin-bottom:3rem">
+        <div class="section-label reveal" style="justify-content:center">Roadmap</div>
+        <h2 class="section-title reveal">Where We're <span class="highlight">Headed</span></h2>
+      </div>
+      <div style="max-width:700px;margin:0 auto">
+        <div class="timeline reveal">
+          <div class="timeline-item">
+            <div class="timeline-dot">✅</div>
+            <div class="timeline-content">
+              <div class="timeline-date">Phase 1 — Completed</div>
+              <div class="timeline-title">Frontend Platform Launch</div>
+              <div class="timeline-desc">Full responsive frontend with stock screener, AI prediction UI, portfolio tracker, education hub, and authentication pages.</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--gold)">🔧</div>
+            <div class="timeline-content">
+              <div class="timeline-date" style="color:var(--gold)">Phase 2 — In Progress</div>
+              <div class="timeline-title">Backend & Database Integration</div>
+              <div class="timeline-desc">FastAPI backend, PostgreSQL database, user authentication with JWT, real-time stock data via yfinance API, and portfolio persistence.</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--text-muted)">🤖</div>
+            <div class="timeline-content">
+              <div class="timeline-date" style="color:var(--text-muted)">Phase 3 — Planned</div>
+              <div class="timeline-title">AI Model Integration</div>
+              <div class="timeline-desc">Deploy trained LSTM, DistilBERT sentiment, Shariah compliance engine, and XGBoost ensemble as live inference APIs.</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot" style="border-color:var(--text-muted)">🌍</div>
+            <div class="timeline-content">
+              <div class="timeline-date" style="color:var(--text-muted)">Phase 4 — Future</div>
+              <div class="timeline-title">Global Expansion</div>
+              <div class="timeline-desc">Arabic language support, Tadawul & Bursa coverage, mobile app, Zakat calculator, and community features.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="about-section">
+    <div class="about-section-inner" style="text-align:center">
+      <div class="cta-inner reveal" style="max-width:700px;margin:0 auto">
+        <div class="orb orb-blue" style="width:300px;height:300px;top:-100px;right:-100px;opacity:0.15"></div>
+        <div class="section-label" style="justify-content:center">Join Us</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;color:var(--white);margin-bottom:1rem;letter-spacing:-0.03em">Start Your Halal<br><span class="highlight">Investment Journey</span></h2>
+        <p style="color:var(--text-muted);margin-bottom:2rem">Free forever. No credit card. No hidden fees. Just smart, ethical investing for the Muslim community.</p>
+        <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap">
+          <a href="signup.html" class="btn-gold btn-lg">Create Free Account <i class="fa fa-arrow-right"></i></a>
+          <a href="screener.html" class="btn-outline btn-lg">Explore Screener</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a><p>AI-powered Halal stock analysis for Muslim investors worldwide.</p><div class="footer-socials"><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a><a href="#" class="social-icon"><i class="fab fa-instagram"></i></a><a href="#" class="social-icon"><i class="fab fa-youtube"></i></a></div></div>
+    <div class="footer-col"><h4>Platform</h4><ul><li><a href="screener.html">Stock Screener</a></li><li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul class="footer-contact"><li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li><li><span class="icon"><i class="fa fa-map-marker"></i></span>Karachi, Pakistan</li><li><span class="icon"><i class="fa fa-phone"></i></span>+92 300 000 0000</li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Disclaimer</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 HalalEdge. Not financial advice.</span><div class="halal-badge">☽ Shariah Certified</div></div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

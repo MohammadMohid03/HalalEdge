@@ -1,0 +1,430 @@
+Here's your complete project roadmap from where you are now to full deployment.
+
+---
+
+## 🗺️ NoorInvest — Full Project Roadmap
+
+---
+
+## ✅ Phase 1 — Frontend (COMPLETED)
+
+| Item | Status |
+|---|---|
+| 8 HTML pages | ✅ Done |
+| Global CSS design system | ✅ Done |
+| Responsive layout | ✅ Done |
+| Stock screener UI | ✅ Done |
+| AI prediction UI | ✅ Done |
+| Portfolio tracker UI | ✅ Done |
+| Learn + FAQ + Glossary | ✅ Done |
+| About + Team page | ✅ Done |
+| Login + Signup with validation | ✅ Done |
+| Animations + hover effects | ✅ Done |
+
+---
+
+## 🔧 Phase 2 — Backend (Next Up)
+
+**Tech Stack:** Python · FastAPI · PostgreSQL · JWT Auth
+
+---
+
+### Step 1 — Project Setup
+```
+backend/
+├── main.py              ← FastAPI app entry point
+├── config.py            ← Environment variables, DB URL
+├── requirements.txt
+├── database.py          ← SQLAlchemy DB connection
+├── models/              ← Database table models
+│   ├── user.py
+│   ├── portfolio.py
+│   └── watchlist.py
+├── routers/             ← API route handlers
+│   ├── auth.py
+│   ├── stocks.py
+│   ├── portfolio.py
+│   └── predictions.py
+├── schemas/             ← Pydantic request/response models
+│   ├── user.py
+│   └── portfolio.py
+├── services/            ← Business logic
+│   ├── stock_data.py    ← yfinance integration
+│   ├── shariah.py       ← Compliance engine
+│   └── auth.py          ← JWT token handling
+└── middleware/
+    └── cors.py
+```
+
+---
+
+### Step 2 — Database Design (PostgreSQL)
+
+**5 Tables you need:**
+
+```sql
+-- Users table
+CREATE TABLE users (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  full_name   VARCHAR(100) NOT NULL,
+  email       VARCHAR(255) UNIQUE NOT NULL,
+  password    VARCHAR(255) NOT NULL,       -- bcrypt hashed
+  country     VARCHAR(100),
+  created_at  TIMESTAMP DEFAULT NOW(),
+  is_active   BOOLEAN DEFAULT TRUE
+);
+
+-- Portfolio holdings
+CREATE TABLE holdings (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE CASCADE,
+  symbol      VARCHAR(10) NOT NULL,
+  shares      DECIMAL(12,4) NOT NULL,
+  avg_price   DECIMAL(12,2) NOT NULL,
+  added_at    TIMESTAMP DEFAULT NOW()
+);
+
+-- Watchlist
+CREATE TABLE watchlist (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE CASCADE,
+  symbol      VARCHAR(10) NOT NULL,
+  added_at    TIMESTAMP DEFAULT NOW()
+);
+
+-- AI Predictions cache
+CREATE TABLE predictions (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  symbol      VARCHAR(10) NOT NULL,
+  verdict     VARCHAR(10),                 -- BUY / HOLD / AVOID
+  confidence  INTEGER,
+  lstm_score  INTEGER,
+  sentiment   INTEGER,
+  shariah_score INTEGER,
+  ensemble    INTEGER,
+  created_at  TIMESTAMP DEFAULT NOW()
+);
+
+-- Shariah compliance cache
+CREATE TABLE shariah_cache (
+  symbol        VARCHAR(10) PRIMARY KEY,
+  status        VARCHAR(20),               -- Halal / Doubtful / Haram
+  score         INTEGER,
+  debt_ratio    DECIMAL(5,2),
+  haram_revenue DECIMAL(5,2),
+  business_type VARCHAR(100),
+  updated_at    TIMESTAMP DEFAULT NOW()
+);
+```
+
+---
+
+### Step 3 — API Endpoints
+
+**Auth Routes** `/api/auth/`
+```
+POST   /register        ← Create account
+POST   /login           ← Returns JWT token
+POST   /logout          ← Invalidate token
+GET    /me              ← Get current user profile
+PUT    /me              ← Update profile
+POST   /forgot-password ← Send reset email
+POST   /reset-password  ← Reset with token
+```
+
+**Stock Routes** `/api/stocks/`
+```
+GET    /search?q=AAPL           ← Search stocks
+GET    /{symbol}                ← Stock detail + live price
+GET    /{symbol}/history        ← Historical OHLCV data
+GET    /screener                ← Filtered stock list
+GET    /top-picks               ← AI top rated halal stocks
+```
+
+**Portfolio Routes** `/api/portfolio/`
+```
+GET    /                ← Get all holdings
+POST   /                ← Add stock to portfolio
+PUT    /{id}            ← Update holding
+DELETE /{id}            ← Remove holding
+GET    /summary         ← Total value, P&L, allocation
+GET    /export          ← Download CSV
+```
+
+**Prediction Routes** `/api/predictions/`
+```
+GET    /{symbol}        ← Get AI prediction for a stock
+GET    /{symbol}/shariah ← Get Shariah compliance detail
+```
+
+**Watchlist Routes** `/api/watchlist/`
+```
+GET    /                ← Get watchlist
+POST   /                ← Add to watchlist
+DELETE /{symbol}        ← Remove from watchlist
+```
+
+---
+
+### Step 4 — Authentication Flow
+
+```
+User Signs Up
+      ↓
+Hash password with bcrypt
+      ↓
+Save to PostgreSQL users table
+      ↓
+Return JWT access token (expires 24h)
+      ↓
+Frontend stores token in localStorage
+      ↓
+Every API request sends: Authorization: Bearer <token>
+      ↓
+Backend verifies token → grants access
+```
+
+---
+
+### Step 5 — Stock Data Integration (Free)
+
+```python
+# services/stock_data.py
+import yfinance as yf
+
+def get_stock_info(symbol: str):
+    ticker = yf.Ticker(symbol)
+    info = ticker.info
+    return {
+        "symbol":    symbol,
+        "name":      info.get("longName"),
+        "price":     info.get("currentPrice"),
+        "change":    info.get("regularMarketChange"),
+        "change_pct":info.get("regularMarketChangePercent"),
+        "market_cap":info.get("marketCap"),
+        "pe_ratio":  info.get("trailingPE"),
+        "volume":    info.get("regularMarketVolume"),
+        "52w_high":  info.get("fiftyTwoWeekHigh"),
+        "52w_low":   info.get("fiftyTwoWeekLow"),
+    }
+
+def get_history(symbol: str, period: str = "1y"):
+    ticker = yf.Ticker(symbol)
+    hist = ticker.history(period=period)
+    return hist[["Open","High","Low","Close","Volume"]].to_dict()
+```
+
+---
+
+### Step 6 — Shariah Compliance Engine
+
+```python
+# services/shariah.py
+def check_shariah(symbol: str) -> dict:
+    ticker = yf.Ticker(symbol)
+    info   = ticker.info
+
+    total_assets  = info.get("totalAssets", 0)
+    total_debt    = info.get("totalDebt", 0)
+    total_revenue = info.get("totalRevenue", 0)
+    interest_exp  = info.get("interestExpense", 0)
+    sector        = info.get("sector", "")
+    industry      = info.get("industry", "")
+
+    # Haram sectors — hard fail
+    haram_sectors = [
+        "Banks", "Insurance", "Diversified Financial Services",
+        "Beverages—Wineries & Distilleries", "Gambling",
+        "Tobacco", "Defense & Aerospace"
+    ]
+    if any(h.lower() in industry.lower() for h in haram_sectors):
+        return { "status": "Haram", "score": 0 }
+
+    # Financial ratio tests
+    debt_ratio    = (total_debt / total_assets * 100) if total_assets else 0
+    interest_ratio = (abs(interest_exp) / total_revenue * 100) if total_revenue else 0
+
+    score = 100
+    if debt_ratio > 33:    score -= 40
+    if interest_ratio > 5: score -= 30
+
+    status = "Halal" if score >= 80 else "Doubtful" if score >= 60 else "Haram"
+    return {
+        "status":       status,
+        "score":        score,
+        "debt_ratio":   round(debt_ratio, 2),
+        "haram_revenue":round(interest_ratio, 2),
+        "sector":       sector,
+    }
+```
+
+---
+
+### Step 7 — Connect Frontend to Backend
+
+In each JS file, replace the hardcoded data with real API calls:
+
+```javascript
+// js/screener.js — replace mock data with:
+const API = 'http://localhost:8000/api';
+
+async function fetchStocks(filters) {
+  const token = localStorage.getItem('token');
+  const res = await fetch(`${API}/stocks/screener?${new URLSearchParams(filters)}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+// js/auth.js — replace fake login with:
+async function handleLogin(e) {
+  e.preventDefault();
+  const res = await fetch(`${API}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await res.json();
+  if (data.access_token) {
+    localStorage.setItem('token', data.access_token);
+    window.location.href = 'index.html';
+  }
+}
+```
+
+---
+
+## 🤖 Phase 3 — AI Implementation
+
+**Tech Stack:** Python · TensorFlow · HuggingFace · Scikit-learn · Pandas
+
+---
+
+### Model 1 — LSTM Price Predictor
+
+```
+Data Collection
+      ↓
+yfinance → 5 years daily OHLCV per stock
+      ↓
+Preprocessing
+      ↓
+Normalize prices (MinMaxScaler)
+Create sequences (60-day windows)
+      ↓
+LSTM Architecture
+      ↓
+Input(60,5) → LSTM(128) → Dropout(0.2)
+           → LSTM(64)  → Dropout(0.2)
+           → Dense(1)  → Output (next price)
+      ↓
+Training
+      ↓
+80% train / 20% test split
+Adam optimizer, MSE loss, 50 epochs
+      ↓
+Output: predicted price direction + % change
+```
+
+---
+
+### Model 2 — Sentiment Analyzer (DistilBERT)
+
+```
+Data Source
+      ↓
+Google News RSS (free) + NewsAPI free tier
+      ↓
+For each stock: collect last 7 days of headlines
+      ↓
+Feed into DistilBERT (HuggingFace)
+      ↓
+from transformers import pipeline
+sentiment = pipeline("sentiment-analysis",
+            model="ProsusAI/finbert")
+      ↓
+Output per headline: Positive / Negative / Neutral + score
+      ↓
+Weight recent news 3x higher than older news
+Average all scores → final sentiment score 0-100
+```
+
+---
+
+### Model 3 — Shariah Filter
+
+```
+Already built in Phase 2 (services/shariah.py)
+      ↓
+This runs as a HARD GATE in the pipeline
+      ↓
+If shariah_score < 60 → return AVOID immediately
+Pipeline stops — no further AI processing
+      ↓
+If shariah_score >= 60 → pass to Model 4
+```
+
+---
+
+### Model 4 — XGBoost Ensemble
+
+```python
+# Train with historical data
+import xgboost as xgb
+
+features = [
+    "lstm_score",        # 0-100 from Model 1
+    "sentiment_score",   # 0-100 from Model 2
+    "shariah_score",     # 0-100 from Model 3
+    "pe_ratio",
+    "debt_ratio",
+    "52w_momentum",
+    "volume_trend",
+    "beta",
+]
+
+# Label: 1=BUY, 0=HOLD, -1=AVOID (based on 3-month forward returns)
+model = xgb.XGBClassifier(
+    n_estimators=300,
+    max_depth=6,
+    learning_rate=0.05,
+)
+model.fit(X_train, y_train)
+
+# Final output
+def predict(symbol):
+    scores = get_all_scores(symbol)
+    pred   = model.predict_proba([scores])
+    verdict    = ["AVOID","HOLD","BUY"][pred.argmax()]
+    confidence = int(pred.max() * 100)
+    return { "verdict": verdict, "confidence": confidence }
+```
+
+---
+
+## ☁️ Phase 4 — Deployment
+
+```
+Frontend          → Vercel (free)       vercel.com
+Backend API       → Render (free)       render.com
+Database          → Supabase (free)     supabase.com
+AI Models         → Render / HuggingFace Spaces (free)
+Stock Data        → yfinance (free)
+News Data         → Google News RSS (free)
+```
+
+---
+
+## 📅 Timeline
+
+| Phase | Work | Estimated Time |
+|---|---|---|
+| ✅ Phase 1 | Frontend | Done |
+| 🔧 Phase 2 | Backend + Database + Auth | 2–3 weeks |
+| 🤖 Phase 3 | AI model training + integration | 3–4 weeks |
+| ☁️ Phase 4 | Deployment + testing | 1 week |
+| **Total** | | **6–8 weeks** |
+
+---
+
+**Start Phase 2 now?** I can build the complete FastAPI backend — all routes, database models, auth system, and yfinance integration — file by file, ready to run locally.

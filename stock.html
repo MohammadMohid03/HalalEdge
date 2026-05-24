@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AAPL — Apple Inc. | HalalEdge</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/stock.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="screener.html">Screener</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li>
+  </ul>
+  <div class="nav-cta"><a href="login.html" class="btn-ghost">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a><a href="screener.html">Screener</a><a href="portfolio.html">Portfolio</a><a href="learn.html">Learn</a><a href="about.html">About</a>
+  <div class="mobile-cta"><a href="login.html" class="btn-outline">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+</div>
+
+<div class="page-wrapper">
+  <!-- Hero -->
+  <div class="stock-hero">
+    <div class="stock-hero-inner">
+      <div class="stock-breadcrumb"><a href="screener.html">Screener</a> <i class="fa fa-chevron-right" style="font-size:0.6rem"></i> <span>AAPL</span></div>
+      <div class="stock-header-row">
+        <div class="stock-id">
+          <div class="stock-logo-big" style="background:linear-gradient(135deg,#1d4ed888,#1d4ed8)">AAPL</div>
+          <div>
+            <div class="stock-ticker">AAPL</div>
+            <div class="stock-fullname">Apple Inc. · NASDAQ</div>
+            <div class="stock-tags">
+              <span class="badge badge-halal">✓ Halal</span>
+              <span class="tag">Technology</span>
+              <span class="tag">Large Cap</span>
+            </div>
+          </div>
+        </div>
+        <div class="stock-price-block">
+          <div class="stock-price-big" id="stockPriceBig">$189.45</div>
+          <div class="stock-change-big up" id="stockChangeBig">▲ +$4.32 (+2.34%)</div>
+          <div class="stock-updated">Updated: <span id="lastUpdated"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="stock-body">
+    <!-- Left column -->
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+      <!-- Chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Price Chart</div>
+          <div class="chart-periods">
+            <div class="chart-period active" onclick="setPeriod('1D',this)">1D</div>
+            <div class="chart-period" onclick="setPeriod('1W',this)">1W</div>
+            <div class="chart-period" onclick="setPeriod('1M',this)">1M</div>
+            <div class="chart-period" onclick="setPeriod('3M',this)">3M</div>
+            <div class="chart-period" onclick="setPeriod('1Y',this)">1Y</div>
+          </div>
+        </div>
+        <div class="chart-body"><canvas id="mainChart" height="220"></canvas></div>
+      </div>
+
+      <!-- Key stats -->
+      <div class="stats-grid-card reveal">
+        <div class="stat-cell"><div class="stat-cell-label">Open</div><div class="stat-cell-value">$186.12</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">High</div><div class="stat-cell-value" style="color:var(--green)">$190.21</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Low</div><div class="stat-cell-value" style="color:var(--red)">$185.88</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Volume</div><div class="stat-cell-value">58.4M</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">Market Cap</div><div class="stat-cell-value">$2.9T</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">P/E Ratio</div><div class="stat-cell-value">29.4x</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">52W High</div><div class="stat-cell-value">$199.62</div></div>
+        <div class="stat-cell"><div class="stat-cell-label">52W Low</div><div class="stat-cell-value">$164.08</div></div>
+      </div>
+
+      <!-- Tabs: About / Financials -->
+      <div class="chart-card reveal">
+        <div class="chart-header">
+          <div class="chart-periods" style="background:var(--bg-2)">
+            <div class="chart-period active" onclick="setInfoTab('about',this)">About</div>
+            <div class="chart-period" onclick="setInfoTab('financials',this)">Financials</div>
+            <div class="chart-period" onclick="setInfoTab('analysis',this)">AI Analysis</div>
+          </div>
+        </div>
+        <div class="chart-body" id="infoTabContent">
+          <p style="color:var(--text-muted);line-height:1.75;font-size:0.9rem">Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide. The company offers iPhone, Mac, iPad, Apple Watch, AirPods and a range of software and services. Apple maintains a strong halal compliance profile with no haram revenue, minimal debt, and primary business in permissible consumer electronics and software. Its robust cash position and consistent dividend policy make it a preferred choice for halal investors globally.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.25rem">
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;text-align:center">
+              <div style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px">REVENUE (TTM)</div>
+              <div style="font-family:var(--font-mono);font-weight:700;color:var(--white)">$394.3B</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;text-align:center">
+              <div style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px">NET INCOME</div>
+              <div style="font-family:var(--font-mono);font-weight:700;color:var(--green)">$96.9B</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;text-align:center">
+              <div style="font-size:0.72rem;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:4px">EPS</div>
+              <div style="font-family:var(--font-mono);font-weight:700;color:var(--white)">$6.43</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- News -->
+      <div class="news-card reveal">
+        <div class="news-card-header">
+          <span>📰 Latest News</span>
+          <span class="ai-badge-live">Sentiment Live</span>
+        </div>
+        <div class="news-items" id="newsItems"></div>
+      </div>
+    </div>
+
+    <!-- Right sidebar -->
+    <div class="stock-sidebar">
+      <!-- AI Prediction -->
+      <div class="ai-pred-card">
+        <div class="ai-pred-header">
+          <div class="ai-pred-title">🤖 AI Prediction</div>
+          <div class="ai-badge-live">Live Analysis</div>
+        </div>
+        <div class="ai-pred-body">
+          <div class="verdict-big buy">
+            <div class="verdict-icon">📈</div>
+            <div class="verdict-word">STRONG BUY</div>
+            <div class="verdict-conf">87% confidence · 4-model ensemble</div>
+          </div>
+
+          <div class="model-breakdown">
+            <div class="model-row">
+              <div class="model-row-label">LSTM Price</div>
+              <div class="model-row-bar"><div class="model-row-fill" style="width:0%;background:linear-gradient(90deg,var(--primary-dark),var(--primary))" data-w="82"></div></div>
+              <div class="model-row-val" style="color:var(--primary)">82</div>
+            </div>
+            <div class="model-row">
+              <div class="model-row-label">Sentiment</div>
+              <div class="model-row-bar"><div class="model-row-fill" style="width:0%;background:linear-gradient(90deg,#d97706,var(--gold))" data-w="76"></div></div>
+              <div class="model-row-val" style="color:var(--gold)">76</div>
+            </div>
+            <div class="model-row">
+              <div class="model-row-label">Shariah</div>
+              <div class="model-row-bar"><div class="model-row-fill" style="width:0%;background:linear-gradient(90deg,var(--halal-green),var(--green))" data-w="96"></div></div>
+              <div class="model-row-val" style="color:var(--green)">96</div>
+            </div>
+            <div class="model-row">
+              <div class="model-row-label">Ensemble</div>
+              <div class="model-row-bar"><div class="model-row-fill" style="width:0%;background:linear-gradient(90deg,var(--primary),var(--green))" data-w="87"></div></div>
+              <div class="model-row-val" style="color:var(--white)">87</div>
+            </div>
+          </div>
+
+          <div class="target-prices">
+            <div class="target-card">
+              <div class="target-label">Bull Target</div>
+              <div class="target-value bull">$218.00</div>
+            </div>
+            <div class="target-card">
+              <div class="target-label">Bear Target</div>
+              <div class="target-value bear">$172.00</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;display:flex;gap:0.5rem">
+            <button class="btn-gold" style="flex:1;justify-content:center" onclick="addToPortfolio()"><i class="fa fa-plus"></i> Add to Portfolio</button>
+          </div>
+          <div style="margin-top:0.5rem">
+            <button class="btn-outline" style="width:100%;justify-content:center" onclick="addToWatchlist()"><i class="fa fa-eye"></i> Add to Watchlist</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shariah Card -->
+      <div class="shariah-card">
+        <div class="shariah-card-header">
+          <div class="shariah-card-title">☽ Shariah Compliance</div>
+          <span class="badge badge-halal">✓ Halal</span>
+        </div>
+        <div class="shariah-card-body">
+          <div class="shariah-row"><span class="shariah-row-label">Debt Ratio</span><span class="shariah-row-value pass">14.2% ✓</span></div>
+          <div class="shariah-row"><span class="shariah-row-label">Haram Revenue</span><span class="shariah-row-value pass">0.0% ✓</span></div>
+          <div class="shariah-row"><span class="shariah-row-label">Business Type</span><span class="shariah-row-value pass">Tech ✓</span></div>
+          <div class="shariah-row"><span class="shariah-row-label">Receivables</span><span class="shariah-row-value warn">38.1% ⚠</span></div>
+          <div class="shariah-row"><span class="shariah-row-label">Interest Income</span><span class="shariah-row-value pass">0.3% ✓</span></div>
+          <div class="shariah-row"><span class="shariah-row-label">Overall Score</span><span class="shariah-row-value pass" style="font-size:1rem;font-weight:800">96 / 100</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a><p>AI-powered Halal stock analysis for Muslim investors worldwide.</p><div class="footer-socials"><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a><a href="#" class="social-icon"><i class="fab fa-instagram"></i></a></div></div>
+    <div class="footer-col"><h4>Platform</h4><ul><li><a href="screener.html">Stock Screener</a></li><li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul class="footer-contact"><li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Disclaimer</a></li><li><a href="#">Privacy</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 HalalEdge. Not financial advice.</span><div class="halal-badge">☽ Shariah Certified</div></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/stock.js"></script>
+</body>
+</html>

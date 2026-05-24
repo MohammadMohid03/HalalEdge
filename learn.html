@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Learn — HalalEdge</title>
+  <link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/learn.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li><li><a href="screener.html">Screener</a></li>
+    <li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html" class="active">Learn</a></li><li><a href="about.html">About</a></li>
+  </ul>
+  <div class="nav-cta"><a href="login.html" class="btn-ghost">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a><a href="screener.html">Screener</a><a href="portfolio.html">Portfolio</a><a href="learn.html">Learn</a><a href="about.html">About</a>
+  <div class="mobile-cta"><a href="login.html" class="btn-outline">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+</div>
+
+<div class="page-wrapper">
+  <!-- Hero -->
+  <div class="learn-hero">
+    <div class="section-label" style="justify-content:center">Knowledge Hub</div>
+    <h1>Learn <span class="highlight">Halal Investing</span></h1>
+    <p>Everything you need to know about Islamic finance, Shariah compliance, and how our AI makes smarter investment decisions.</p>
+    <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap">
+      <a href="#what-is-halal" class="btn-primary btn-lg">Start Learning <i class="fa fa-arrow-down"></i></a>
+      <a href="#faq" class="btn-outline btn-lg">Jump to FAQ</a>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:1.5rem 2rem">
+    <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;text-align:center">
+      <div><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--white)">12</div><div style="font-size:0.78rem;color:var(--text-muted)">Articles</div></div>
+      <div><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--white)">20+</div><div style="font-size:0.78rem;color:var(--text-muted)">FAQ Answers</div></div>
+      <div><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--white)">50+</div><div style="font-size:0.78rem;color:var(--text-muted)">Glossary Terms</div></div>
+      <div><div style="font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--white)">Free</div><div style="font-size:0.78rem;color:var(--text-muted)">Always & Forever</div></div>
+    </div>
+  </div>
+
+  <div class="learn-body">
+    <div class="learn-grid">
+      <!-- Sidebar nav -->
+      <nav class="learn-nav">
+        <div class="learn-nav-item active" onclick="scrollToSection('what-is-halal',this)"><span>📖</span> What is Halal?</div>
+        <div class="learn-nav-item" onclick="scrollToSection('shariah',this)"><span>☽</span> Shariah Standards</div>
+        <div class="learn-nav-item" onclick="scrollToSection('how-ai',this)"><span>🤖</span> How AI Works</div>
+        <div class="learn-nav-item" onclick="scrollToSection('basics',this)"><span>📈</span> Investing Basics</div>
+        <div class="learn-nav-item" onclick="scrollToSection('faq',this)"><span>❓</span> FAQ</div>
+        <div class="learn-nav-item" onclick="scrollToSection('glossary',this)"><span>📚</span> Glossary</div>
+      </nav>
+
+      <!-- Content -->
+      <div class="learn-content">
+
+        <!-- What is Halal -->
+        <div class="learn-section reveal" id="what-is-halal">
+          <div class="learn-section-title"><span>📖</span> What is Halal Investing?</div>
+          <div class="learn-section-desc">Halal investing refers to making investment decisions that comply with Islamic Shariah law. It avoids interest (riba), excessive uncertainty (gharar), and businesses involved in prohibited activities.</div>
+          <div class="article-cards">
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">🚫</div>
+              <div class="article-title">What Makes a Stock Haram?</div>
+              <div class="article-desc">Learn which industries and financial characteristics disqualify a stock from Shariah compliance — alcohol, gambling, conventional banking and more.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">
+                A stock is considered haram if the company's primary business involves: (1) Alcohol production or distribution, (2) Conventional banking or insurance that charges/pays riba, (3) Gambling or casinos, (4) Pork products, (5) Weapons manufacturing, (6) Pornography or adult entertainment, (7) Tobacco. Even otherwise permissible companies can be screened out if their debt ratio exceeds 33% or haram revenue exceeds 5% of total revenue.
+              </div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">✅</div>
+              <div class="article-title">What Makes a Stock Halal?</div>
+              <div class="article-desc">Understand the positive criteria: permissible business activity, low debt, minimal haram revenue, and passing the AAOIFI financial ratio tests.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">
+                For a stock to be considered halal: (1) The core business must be permissible (tech, healthcare, real estate, consumer goods, etc.), (2) Total interest-bearing debt must be less than 33% of total assets, (3) Revenue from haram activities must be less than 5%, (4) Accounts receivable and cash must not exceed 49% of total assets. Companies like Apple, Microsoft, and Google typically pass these screens comfortably.
+              </div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">💸</div>
+              <div class="article-title">What is Riba (Interest)?</div>
+              <div class="article-desc">Riba is the Islamic prohibition on interest. Understand why it matters for investing and how to avoid companies with excessive interest-based financing.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">
+                Riba literally means "increase" or "excess" in Arabic and refers to any guaranteed interest payment on money lent or borrowed. In investing, this means: avoiding bonds (which pay fixed interest), avoiding conventional banks (whose business model is riba), and scrutinizing companies that carry excessive interest-bearing debt. Companies that earn significant interest income on cash holdings can also become problematic. HalalEdge automatically flags all riba-related issues.
+              </div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">🌍</div>
+              <div class="article-title">Global Halal Finance Market</div>
+              <div class="article-desc">The Islamic finance industry is worth over $4 trillion and growing at 10% annually. Discover the global opportunity for Muslim investors.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">
+                The global Islamic finance industry surpassed $4 trillion in assets in 2024, driven by growth in GCC countries, Malaysia, Indonesia, and the United Kingdom. With 1.8 billion Muslims globally and rising financial literacy, halal investment products are among the fastest-growing segments in global finance. Yet access to quality halal stock screening tools remains limited — which is exactly the gap HalalEdge aims to fill.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shariah Standards -->
+        <div class="learn-section reveal" id="shariah">
+          <div class="learn-section-title"><span>☽</span> AAOIFI Shariah Standards</div>
+          <div class="learn-section-desc">HalalEdge uses AAOIFI (Accounting and Auditing Organization for Islamic Financial Institutions) standards — the global benchmark for Islamic finance compliance.</div>
+
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem">
+            <div style="background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:var(--radius);padding:1.25rem">
+              <div style="font-weight:700;color:var(--green);margin-bottom:0.75rem;display:flex;align-items:center;gap:6px"><i class="fa fa-check-circle"></i> Financial Ratio Tests</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7">
+                <div style="margin-bottom:6px">• Debt ratio ≤ <strong style="color:var(--white)">33%</strong> of total assets</div>
+                <div style="margin-bottom:6px">• Receivables ≤ <strong style="color:var(--white)">49%</strong> of total assets</div>
+                <div style="margin-bottom:6px">• Haram revenue ≤ <strong style="color:var(--white)">5%</strong> of total revenue</div>
+                <div>• Interest income ≤ <strong style="color:var(--white)">5%</strong> of total revenue</div>
+              </div>
+            </div>
+            <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:1.25rem">
+              <div style="font-weight:700;color:var(--red);margin-bottom:0.75rem;display:flex;align-items:center;gap:6px"><i class="fa fa-ban"></i> Prohibited Sectors</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);line-height:1.7">
+                <div style="margin-bottom:6px">• Alcohol & tobacco production</div>
+                <div style="margin-bottom:6px">• Conventional banking & insurance</div>
+                <div style="margin-bottom:6px">• Gambling & casinos</div>
+                <div style="margin-bottom:6px">• Pork & non-halal food</div>
+                <div>• Adult entertainment & weapons</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:var(--radius);padding:1.25rem">
+            <div style="font-weight:700;color:var(--primary);margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="fa fa-info-circle"></i> Our Scoring System</div>
+            <div style="font-size:0.83rem;color:var(--text-muted);line-height:1.7">We assign a Shariah Compliance Score from 0–100 to every stock. A score above 80 is considered Halal, 60–79 is Doubtful (requires further review), and below 60 is not recommended. The score weights business activity (50%), financial ratios (35%), and revenue composition (15%).</div>
+          </div>
+        </div>
+
+        <!-- How AI Works -->
+        <div class="learn-section reveal" id="how-ai">
+          <div class="learn-section-title"><span>🤖</span> How Our AI Works</div>
+          <div class="learn-section-desc">HalalEdge uses a 4-model ensemble pipeline. Each model is a specialist — together they produce predictions no single model could achieve alone.</div>
+
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div style="background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.15);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:flex-start;gap:1rem">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary-dark),var(--primary));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;font-family:var(--font-mono);flex-shrink:0">M1</div>
+              <div><div style="font-weight:700;color:var(--white);margin-bottom:4px">LSTM — Price Trend Predictor (40% weight)</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">Long Short-Term Memory networks excel at sequential data. We train on 5 years of daily OHLCV data per stock. The model learns to identify recurring patterns — momentum, reversals, and seasonality — that human analysts often miss.</div></div>
+            </div>
+            <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:flex-start;gap:1rem">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#d97706,var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;font-family:var(--font-mono);flex-shrink:0">M2</div>
+              <div><div style="font-weight:700;color:var(--white);margin-bottom:4px">DistilBERT — Sentiment Analyzer (30% weight)</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">A lightweight version of BERT fine-tuned on financial news. We ingest thousands of headlines daily and score each Positive / Negative / Neutral. Recent news is weighted 3× higher than older articles to capture fast-moving sentiment shifts.</div></div>
+            </div>
+            <div style="background:rgba(5,150,105,0.06);border:1px solid rgba(5,150,105,0.15);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:flex-start;gap:1rem">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--halal-green),var(--green));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;font-family:var(--font-mono);flex-shrink:0">M3</div>
+              <div><div style="font-weight:700;color:var(--white);margin-bottom:4px">Shariah Filter — Compliance Gate (Hard Gate)</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">This is a hard filter, not a soft weight. If a stock fails AAOIFI standards, the pipeline stops and returns AVOID regardless of what M1 and M2 say. Shariah compliance is non-negotiable in our system.</div></div>
+            </div>
+            <div style="background:rgba(139,92,246,0.06);border:1px solid rgba(139,92,246,0.15);border-radius:var(--radius);padding:1.25rem;display:flex;align-items:flex-start;gap:1rem">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;color:white;font-family:var(--font-mono);flex-shrink:0">M4</div>
+              <div><div style="font-weight:700;color:var(--white);margin-bottom:4px">XGBoost — Ensemble Scorer (Final)</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">Gradient-boosted trees combine all signals into one final score. XGBoost was chosen for its speed and ability to handle mixed feature types. It outputs a probability score (0–100) mapped to BUY / HOLD / AVOID with a confidence percentage.</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investing Basics -->
+        <div class="learn-section reveal" id="basics">
+          <div class="learn-section-title"><span>📈</span> Investing Basics for Beginners</div>
+          <div class="learn-section-desc">New to investing? Start here. These articles cover everything from what a stock is to how to read financial ratios.</div>
+          <div class="article-cards">
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">🏢</div>
+              <div class="article-title">What is a Stock?</div>
+              <div class="article-desc">A stock represents ownership in a company. When you buy shares, you become a part-owner and share in its profits and growth.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">When a company wants to raise money, it can sell ownership stakes to the public through shares. If Apple has 15 billion shares outstanding and you own 10 shares, you own 10/15,000,000,000 of Apple Inc. As the company grows and earns more profit, each share becomes more valuable. This is why halal investing in stocks is permissible — you are a real owner sharing in real business profits, not charging or paying interest.</div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">📊</div>
+              <div class="article-title">Understanding P/E Ratio</div>
+              <div class="article-desc">The Price-to-Earnings ratio tells you how much you're paying for each dollar of a company's earnings. Learn to use it wisely.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">P/E = Stock Price ÷ Earnings Per Share. If a stock trades at $100 and earns $5 per share, the P/E is 20x — meaning you pay $20 for every $1 of earnings. A high P/E (40x+) means investors expect fast growth. A low P/E (10x–15x) suggests slower growth or undervaluation. Compare P/E to industry peers, not across sectors — tech companies naturally trade at higher P/Es than utilities.</div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">⚖️</div>
+              <div class="article-title">Diversification in Islam</div>
+              <div class="article-desc">Is diversification permissible in Islam? Yes — and it's actually recommended. Learn how to build a diversified halal portfolio.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">Diversification — spreading investments across multiple halal companies and sectors — is fully permissible and encouraged in Islamic finance. The Prophet (ﷺ) said "Do not put all your eggs in one basket" (paraphrased from various hadith about risk management). A well-diversified halal portfolio typically includes technology, healthcare, consumer goods, industrials, and real estate sectors — all avoiding haram industries.</div>
+            </div>
+            <div class="article-card" onclick="expandArticle(this)">
+              <div class="article-emoji">🎯</div>
+              <div class="article-title">Long-term vs Short-term</div>
+              <div class="article-desc">Is day trading halal? What about long-term investing? Understand the Islamic perspective on different investment horizons.</div>
+              <div class="article-read">Read more →</div>
+              <div class="article-expanded" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:0.83rem;color:var(--text-muted);line-height:1.75">Long-term investing (months to years) is generally considered more appropriate in Islamic finance as it reflects genuine ownership and participation in business growth. Day trading is more controversial — some scholars permit it if no riba is involved (e.g. no margin trading), while others discourage it due to excessive speculation (gharar). HalalEdge's AI predictions are calibrated for medium-term (1–12 month) investment horizons.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="learn-section reveal" id="faq">
+          <div class="learn-section-title"><span>❓</span> Frequently Asked Questions</div>
+          <div class="learn-section-desc">Quick answers to the most common questions from our users.</div>
+          <div class="faq-list" id="faqList"></div>
+        </div>
+
+        <!-- Glossary -->
+        <div class="learn-section reveal" id="glossary">
+          <div class="learn-section-title"><span>📚</span> Investing Glossary</div>
+          <div class="learn-section-desc">Key terms every halal investor should know — from Shariah finance concepts to standard market terminology.</div>
+          <div class="glossary-grid" id="glossaryGrid"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a><p>AI-powered Halal stock analysis for Muslim investors worldwide.</p><div class="footer-socials"><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a><a href="#" class="social-icon"><i class="fab fa-instagram"></i></a></div></div>
+    <div class="footer-col"><h4>Platform</h4><ul><li><a href="screener.html">Screener</a></li><li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul class="footer-contact"><li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li><li><span class="icon"><i class="fa fa-map-marker"></i></span>Karachi, Pakistan</li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Use</a></li><li><a href="#">Disclaimer</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 HalalEdge. Not financial advice.</span><div class="halal-badge">☽ Shariah Certified</div></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/learn.js"></script>
+</body>
+</html>

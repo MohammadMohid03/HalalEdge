@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+pg8000
+pydantic
+pydantic-settings
+python-jose[cryptography]
+passlib[bcrypt]
+yfinance
+pandas
+python-multipart
+python-dotenv
+requests
+cryptography

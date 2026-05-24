@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Portfolio — HalalEdge</title>
+  <link rel="stylesheet" href="css/style.css"/><link rel="stylesheet" href="css/portfolio.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
+  <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="screener.html">Screener</a></li><li><a href="portfolio.html" class="active">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul>
+  <div class="nav-cta"><a href="login.html" class="btn-ghost">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a><a href="screener.html">Screener</a><a href="portfolio.html">Portfolio</a><a href="learn.html">Learn</a><a href="about.html">About</a>
+  <div class="mobile-cta"><a href="login.html" class="btn-outline">Sign In</a><a href="signup.html" class="btn-primary">Get Started</a></div>
+</div>
+
+<div class="page-wrapper">
+  <div class="portfolio-hero">
+    <div class="portfolio-hero-inner">
+      <div>
+        <div class="section-label">My Portfolio</div>
+        <h1>Halal Portfolio <span class="highlight">Tracker</span></h1>
+      </div>
+      <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+        <button class="btn-outline" onclick="exportPortfolio()"><i class="fa fa-download"></i> Export</button>
+        <button class="btn-primary" onclick="openModal()"><i class="fa fa-plus"></i> Add Stock</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="portfolio-body">
+    <!-- Summary Cards -->
+    <div class="portfolio-summary reveal">
+      <div class="summary-card">
+        <div class="summary-card-label"><i class="fa fa-wallet" style="color:var(--primary)"></i> Total Value</div>
+        <div class="summary-card-value" id="totalValue">$0</div>
+        <div class="summary-card-sub price-up" id="totalGainAbs">+$0 (0%)</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label"><i class="fa fa-arrow-trend-up" style="color:var(--green)"></i> Today's Gain</div>
+        <div class="summary-card-value price-up" id="todayGain">+$0</div>
+        <div class="summary-card-sub" style="color:var(--text-muted)">Today's change</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label"><i class="fa fa-chart-pie" style="color:var(--gold)"></i> Holdings</div>
+        <div class="summary-card-value" id="holdingsCount">0</div>
+        <div class="summary-card-sub" style="color:var(--text-muted)">Halal stocks</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label"><i class="fa fa-shield" style="color:var(--green)"></i> Avg Shariah</div>
+        <div class="summary-card-value">94<span style="font-size:1rem;color:var(--text-muted)">/100</span></div>
+        <div class="summary-card-sub" style="color:var(--green)">✓ Fully Compliant</div>
+      </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="portfolio-grid">
+      <!-- Holdings table -->
+      <div class="holdings-card">
+        <div class="holdings-header">
+          <div class="holdings-title">📊 Holdings</div>
+          <span class="ai-badge-live">Live Prices</span>
+        </div>
+        <table class="holdings-table">
+          <thead><tr>
+            <th>Stock</th><th>Shares</th><th>Avg Price</th><th>Current</th><th>Value</th><th>P&L</th><th>AI</th><th></th>
+          </tr></thead>
+          <tbody id="holdingsBody"></tbody>
+        </table>
+        <div id="emptyPortfolio" style="padding:3rem;text-align:center;color:var(--text-muted)">
+          <div style="font-size:3rem;margin-bottom:1rem">📈</div>
+          <div style="font-weight:600;color:var(--white);margin-bottom:0.5rem">No holdings yet</div>
+          <div style="font-size:0.875rem;margin-bottom:1.5rem">Start building your halal portfolio</div>
+          <button class="btn-primary" onclick="openModal()"><i class="fa fa-plus"></i> Add Your First Stock</button>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <!-- Pie chart -->
+        <div class="pie-card">
+          <div class="pie-card-title">Sector Allocation</div>
+          <div class="pie-canvas-wrap"><canvas id="pieChart" width="200" height="200"></canvas></div>
+          <div class="pie-legend" id="pieLegend"><div style="font-size:0.82rem;color:var(--text-muted);text-align:center">Add stocks to see allocation</div></div>
+        </div>
+
+        <!-- AI Recommendations -->
+        <div class="card">
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:8px"><span>🤖</span> AI Suggestions</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem">
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="location.href='stock.html'">
+              <div style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#76c44255,#76c442);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;color:white;font-family:var(--font-display)">NV</div>
+              <div style="flex:1"><div style="font-weight:700;font-size:0.875rem;color:var(--white)">NVDA</div><div style="font-size:0.72rem;color:var(--text-muted)">AI Score: 91% · BUY</div></div>
+              <span class="badge badge-buy">BUY</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="location.href='stock.html'">
+              <div style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#f59e0b55,#f59e0b);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;color:white;font-family:var(--font-display)">AS</div>
+              <div style="flex:1"><div style="font-weight:700;font-size:0.875rem;color:var(--white)">ASML</div><div style="font-size:0.72rem;color:var(--text-muted)">AI Score: 88% · BUY</div></div>
+              <span class="badge badge-buy">BUY</span>
+            </div>
+            <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;display:flex;align-items:center;gap:0.75rem;cursor:pointer" onclick="location.href='stock.html'">
+              <div style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#0ea5e955,#0ea5e9);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.7rem;color:white;font-family:var(--font-display)">TS</div>
+              <div style="flex:1"><div style="font-weight:700;font-size:0.875rem;color:var(--white)">TSM</div><div style="font-size:0.72rem;color:var(--text-muted)">AI Score: 85% · BUY</div></div>
+              <span class="badge badge-buy">BUY</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Stock Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">➕ Add Stock</div>
+      <div class="modal-close" onclick="closeModal()"><i class="fa fa-times"></i></div>
+    </div>
+    <div class="modal-form">
+      <div class="form-group">
+        <label>Stock Symbol</label>
+        <div class="input-wrapper">
+          <i class="fa fa-chart-line input-icon"></i>
+          <input type="text" class="form-input" id="modalSymbol" placeholder="e.g. AAPL, MSFT, NVDA" style="text-transform:uppercase"/>
+        </div>
+        <div class="field-error" id="symbolErr"><i class="fa fa-exclamation-circle"></i> Please enter a valid symbol</div>
+      </div>
+      <div class="form-group">
+        <label>Number of Shares</label>
+        <div class="input-wrapper">
+          <i class="fa fa-layer-group input-icon"></i>
+          <input type="number" class="form-input" id="modalShares" placeholder="e.g. 10" min="0.001" step="0.001"/>
+        </div>
+        <div class="field-error" id="sharesErr"><i class="fa fa-exclamation-circle"></i> Please enter a valid number</div>
+      </div>
+      <div class="form-group">
+        <label>Average Buy Price (USD)</label>
+        <div class="input-wrapper">
+          <i class="fa fa-dollar-sign input-icon"></i>
+          <input type="number" class="form-input" id="modalPrice" placeholder="e.g. 185.00" min="0.01" step="0.01"/>
+        </div>
+        <div class="field-error" id="priceErr"><i class="fa fa-exclamation-circle"></i> Please enter a valid price</div>
+      </div>
+      <div class="modal-actions">
+        <button style="background:transparent;border:1px solid var(--border);color:var(--text-muted);border-radius:var(--radius-sm)" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" style="flex:1;justify-content:center" onclick="addStock()"><i class="fa fa-plus"></i> Add to Portfolio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a><p>AI-powered Halal stock analysis for Muslim investors.</p><div class="footer-socials"><a href="#" class="social-icon"><i class="fab fa-twitter"></i></a><a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a></div></div>
+    <div class="footer-col"><h4>Platform</h4><ul><li><a href="screener.html">Screener</a></li><li><a href="portfolio.html">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul></div>
+    <div class="footer-col"><h4>Contact</h4><ul class="footer-contact"><li><span class="icon"><i class="fa fa-envelope"></i></span>hello@HalalEdge.com</li></ul></div>
+    <div class="footer-col"><h4>Legal</h4><ul><li><a href="#">Disclaimer</a></li><li><a href="#">Privacy</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 HalalEdge. Not financial advice.</span><div class="halal-badge">☽ Shariah Certified</div></div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/portfolio.js"></script>
+</body>
+</html>

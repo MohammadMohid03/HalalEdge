@@ -1,0 +1,29 @@
+# Antigravity CLI artifacts
+.antigravitycli/
+.antigravity-cli/
+
+# Environment configurations (Contains Supabase secrets)
+.env
+backend/.env
+
+# Local SQLite databases
+*.db
+noorinvest.db
+test_noorinvest.db
+
+# Python compilation and caching
+__pycache__/
+backend/__pycache__/
+backend/*/__pycache__/
+*.py[cod]
+*$py.class
+
+# Python virtual environments
+venv/
+.venv/
+env/
+
+# Miscellaneous
+error.txt
+.vscode/
+.idea/
