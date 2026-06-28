@@ -20,3 +20,5 @@ feedparser
 beautifulsoup4
 numpy
 joblib
+email-validator
+
