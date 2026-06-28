@@ -29,8 +29,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "*",
-        "https://halaledge.vercel.app",
+        "https://halal-edge.vercel.app",
         "https://halaledge.onrender.com",
     ],
     allow_credentials=True,
