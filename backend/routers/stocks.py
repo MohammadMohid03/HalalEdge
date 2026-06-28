@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Query, HTTPException, status
 from typing import List, Optional
-from backend.schemas.stocks import StockSearchItem, StockDetailOut, StockHistoryOut
+from backend.schemas.stocks import StockSearchItem, StockDetailOut, StockHistoryOut, StockDetailBatchItem
 from backend.services.stock_data import (
     get_stock_info,
     get_history,
     search_stocks,
     get_screener_stocks,
-    get_top_picks
+    get_top_picks,
+    get_batch_stock_data
 )
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
@@ -29,6 +30,13 @@ def screener(
         "q": q
     }
     return get_screener_stocks(filters)
+
+@router.get("/batch-data", response_model=List[StockDetailBatchItem])
+def batch_data(symbols: str = Query(..., description="Comma-separated list of symbols (max 50)")):
+    sym_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]
+    if len(sym_list) > 50:
+        sym_list = sym_list[:50]
+    return get_batch_stock_data(sym_list)
 
 @router.get("/top-picks", response_model=List[StockDetailOut])
 def top_picks():

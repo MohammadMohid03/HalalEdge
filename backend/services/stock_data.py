@@ -405,39 +405,89 @@ def _get_batch_prices(symbols: List[str]) -> dict:
     return result
 
 
-def _fetch_single_stock_detail(symbol: str) -> dict:
-    """Fetch market_cap, PE, 52w high/low, sector, industry, name from yfinance .info for one symbol."""
+def _fetch_fast_info(symbol: str) -> dict:
+    """Fetch live price, market cap, 52w range, volume from yfinance fast_info for one symbol."""
     try:
-        info = yf.Ticker(symbol).info
+        fi = yf.Ticker(symbol).fast_info
+        price = fi.last_price
+        if not price:
+            return {}
+        prev = fi.previous_close or price
+        change = price - prev
+        change_pct = (change / prev) * 100.0 if prev else 0.0
         return {
-            "market_cap": info.get("marketCap"),
-            "pe_ratio": info.get("trailingPE"),
-            "fifty_two_week_high": info.get("fiftyTwoWeekHigh"),
-            "fifty_two_week_low": info.get("fiftyTwoWeekLow"),
-            "sector": info.get("sector"),
-            "industry": info.get("industry"),
-            "name": info.get("longName") or info.get("shortName"),
+            "price": round(float(price), 2),
+            "change": round(float(change), 2),
+            "change_pct": round(float(change_pct), 2),
+            "market_cap": fi.market_cap,
+            "volume": fi.ten_day_average_volume or 0,
+            "fifty_two_week_high": fi.year_high,
+            "fifty_two_week_low": fi.year_low,
         }
     except Exception:
         return {}
 
 
-def _get_batch_stock_details(symbols: List[str]) -> dict:
-    """Fetch stock details (market cap, PE, 52w range, etc.) for many tickers in parallel."""
-    if not symbols:
-        return {}
-    result = {}
-    with ThreadPoolExecutor(max_workers=30) as ex:
-        futures = {ex.submit(_fetch_single_stock_detail, sym): sym for sym in symbols}
-        for future in futures:
-            sym = futures[future]
-            try:
-                details = future.result()
-                if details:
-                    result[sym] = details
-            except Exception:
+_batch_data_cache = {}  # symbol -> (fetch_time, data_dict) — 5 min TTL
+_batch_data_cache_ttl = 300
+
+
+def get_batch_stock_data(symbols: List[str]) -> List[dict]:
+    """Fetch live prices, market cap, and dynamic AI score for a batch of symbols (max ~50).
+
+    Uses fast_info (lighter than .info) with limited threads to avoid rate-limiting.
+    Caches per-symbol for 5 minutes so paginating back is instant.
+    """
+    now = time.time()
+    to_fetch = []
+    cached = {}
+    for sym in symbols:
+        sym = sym.upper().strip()
+        if sym in _batch_data_cache:
+            cached_time, cached_val = _batch_data_cache[sym]
+            if now - cached_time < _batch_data_cache_ttl:
+                cached[sym] = cached_val
                 continue
-    return result
+        to_fetch.append(sym)
+
+    fresh = {}
+    if to_fetch:
+        with ThreadPoolExecutor(max_workers=20) as ex:
+            futures = {ex.submit(_fetch_fast_info, sym): sym for sym in to_fetch}
+            for future in futures:
+                sym = futures[future]
+                try:
+                    data = future.result()
+                    fresh[sym] = data
+                    _batch_data_cache[sym] = (now, data)
+                except Exception:
+                    fresh[sym] = {}
+                    _batch_data_cache[sym] = (now, {})
+
+    results = []
+    for sym in symbols:
+        sym = sym.upper().strip()
+        data = cached.get(sym) or fresh.get(sym, {})
+        if not data or not data.get("price"):
+            results.append({"symbol": sym})
+        else:
+            ai_score, verdict = _ai_score_from_momentum(data["change_pct"])
+            mc = data.get("market_cap")
+            high52 = data.get("fifty_two_week_high")
+            low52 = data.get("fifty_two_week_low")
+            results.append({
+                "symbol": sym,
+                "price": data["price"],
+                "change": data["change"],
+                "change_pct": data["change_pct"],
+                "market_cap": mc if mc else None,
+                "volume": data.get("volume", 0),
+                "fifty_two_week_high": round(float(high52), 2) if high52 else None,
+                "fifty_two_week_low": round(float(low52), 2) if low52 else None,
+                "ai_score": ai_score,
+                "verdict": verdict,
+            })
+    return results
 
 
 def _shariah_heuristic(gics_sector: str, industry: str) -> dict:
@@ -461,7 +511,11 @@ def _ai_score_from_momentum(change_pct: float, base: int = 68) -> tuple:
 
 
 def _get_extended_screener_stocks() -> List[dict]:
-    """Build screener data for S&P 500 stocks beyond STOCK_METADATA (dynamic, cached 5 min)."""
+    """Build screener data for S&P 500 stocks beyond STOCK_METADATA (instant, no yfinance calls).
+
+    Returns all stocks with static data from Wikipedia + heuristics. Prices and market cap
+    are fetched lazily via get_batch_stock_data() in small batches by the frontend.
+    """
     global _screener_universe_cache
     if _screener_universe_cache and (time.time() - _screener_universe_cache[0]) < _screener_universe_cache_ttl:
         return _screener_universe_cache[1]
@@ -471,42 +525,28 @@ def _get_extended_screener_stocks() -> List[dict]:
     if not extended:
         return []
 
-    symbols = [c["symbol"] for c in extended]
-    batch_prices = _get_batch_prices(symbols)
-    batch_details = _get_batch_stock_details(symbols)
-
     results = []
     for c in extended:
         sym = c["symbol"]
-        px = batch_prices.get(sym)
-        if not px:
-            continue
-        det = batch_details.get(sym, {})
         mapped_sector = _GICS_SECTOR_MAP.get(c["gics_sector"], c["gics_sector"] or "Unknown")
-        sector = det.get("sector") or mapped_sector
         sh = _shariah_heuristic(c["gics_sector"], c["industry"])
-        ai_score, verdict = _ai_score_from_momentum(px["change_pct"])
-        market_cap = det.get("market_cap")
-        fifty_two_w_high = det.get("fifty_two_week_high")
-        fifty_two_w_low = det.get("fifty_two_week_low")
-        pe_ratio = det.get("pe_ratio")
         results.append({
             "symbol": sym,
-            "name": det.get("name") or c["name"],
-            "price": px["price"],
-            "change": px["change"],
-            "change_pct": px["change_pct"],
-            "market_cap": market_cap if market_cap else None,
-            "pe_ratio": round(float(pe_ratio), 2) if pe_ratio else None,
-            "volume": px["volume"],
-            "fifty_two_week_high": round(float(fifty_two_w_high), 2) if fifty_two_w_high else None,
-            "fifty_two_week_low": round(float(fifty_two_w_low), 2) if fifty_two_w_low else None,
-            "sector": sector,
-            "industry": det.get("industry") or c["industry"] or sector,
+            "name": c["name"],
+            "price": 0,
+            "change": 0,
+            "change_pct": 0,
+            "market_cap": None,
+            "pe_ratio": None,
+            "volume": 0,
+            "fifty_two_week_high": None,
+            "fifty_two_week_low": None,
+            "sector": mapped_sector,
+            "industry": c["industry"] or mapped_sector,
             "shariah_status": sh["status"],
             "shariah_score": sh["score"],
-            "ai_score": ai_score,
-            "verdict": verdict,
+            "ai_score": 70,
+            "verdict": "HOLD",
             "color": _color_from_symbol(sym),
         })
 
@@ -514,11 +554,40 @@ def _get_extended_screener_stocks() -> List[dict]:
     return results
 
 
+def _get_metadata_screener_stocks() -> List[dict]:
+    """Build screener data for the 24 STOCK_METADATA stocks instantly (no yfinance calls).
+
+    Uses STOCK_METADATA + MOCK_COMPLIANCE for all static data. Prices are fetched lazily.
+    """
+    from backend.services.shariah import MOCK_COMPLIANCE
+    results = []
+    for sym, meta in STOCK_METADATA.items():
+        sh = MOCK_COMPLIANCE.get(sym, {"status": "Halal", "score": 70})
+        results.append({
+            "symbol": sym,
+            "name": meta["name"],
+            "price": 0,
+            "change": 0,
+            "change_pct": 0,
+            "market_cap": None,
+            "pe_ratio": None,
+            "volume": 0,
+            "fifty_two_week_high": None,
+            "fifty_two_week_low": None,
+            "sector": meta["sector"],
+            "industry": meta["sector"],
+            "shariah_status": sh["status"],
+            "shariah_score": sh["score"],
+            "ai_score": meta["ai_score"],
+            "verdict": meta["verdict"],
+            "color": meta["color"],
+        })
+    return results
+
+
 def get_screener_stocks(filters: dict) -> List[dict]:
-    # Featured stocks from STOCK_METADATA (rich data, fetched in parallel, cached per-stock)
-    with ThreadPoolExecutor(max_workers=8) as ex:
-        all_screened = list(ex.map(get_stock_info, list(STOCK_METADATA.keys())))
-    # Extended universe: S&P 500 constituents fetched dynamically via yfinance
+    # Phase 1: Return ALL stocks instantly with static data (no yfinance calls)
+    all_screened = _get_metadata_screener_stocks()
     all_screened.extend(_get_extended_screener_stocks())
 
     # Apply filters

@@ -44,3 +44,17 @@ class StockHistoryItem(BaseModel):
 class StockHistoryOut(BaseModel):
     symbol: str
     history: List[StockHistoryItem]
+
+
+class StockDetailBatchItem(BaseModel):
+    symbol: str
+    price: Optional[float] = None
+    change: Optional[float] = None
+    change_pct: Optional[float] = None
+    market_cap: Optional[float] = None
+    pe_ratio: Optional[float] = None
+    volume: Optional[float] = None
+    fifty_two_week_high: Optional[float] = None
+    fifty_two_week_low: Optional[float] = None
+    ai_score: Optional[int] = None
+    verdict: Optional[str] = None
