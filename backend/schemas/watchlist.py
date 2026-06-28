@@ -12,6 +12,7 @@ class WatchlistOut(WatchlistBase):
     id: UUID
     user_id: UUID
     added_at: datetime
+    email_alerts: bool
 
     class Config:
         from_attributes = True

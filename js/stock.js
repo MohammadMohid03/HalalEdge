@@ -6,6 +6,7 @@ let currentPrice = 180.00; // Will be updated dynamically
 let companyDetails = {};
 let aiPrediction = {};
 let shariahDetail = {};
+let predictionHistory = [];
 let chart = null;
 
 // ── Update timestamp ──────────────────────────────────────────
@@ -121,6 +122,16 @@ async function loadStockDetails() {
     } catch (e) {
       console.error('Error fetching Shariah details:', e);
     }
+
+    // 4. Fetch Prediction History
+    try {
+      const histRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/history`);
+      if (histRes.ok) {
+        predictionHistory = await histRes.json();
+      }
+    } catch (e) {
+      console.error('Error fetching prediction history:', e);
+    }
   } catch (err) {
     console.error('Error fetching stock details:', err);
     showStockPageError();
@@ -234,6 +245,28 @@ function updateTabsUI(tab) {
       <div style="background:var(--green-glow);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius);padding:1rem"><div style="font-weight:700;color:var(--green);margin-bottom:6px">✓ Bull Case</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">Strong business dynamics in ${companyDetails.sector}, robust cash streams, and favorable market outlook. AI score stands at ${companyDetails.ai_score}%.</div></div>
       <div style="background:var(--red-glow);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius);padding:1rem"><div style="font-weight:700;color:var(--red);margin-bottom:6px">⚠ Bear Case</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">Macro headwinds, regulatory challenges in ${companyDetails.industry}, and global volatility. Shariah debt levels need ongoing quarterly monitoring.</div></div>
       <div style="background:rgba(14,165,233,0.08);border:1px solid rgba(14,165,233,0.2);border-radius:var(--radius);padding:1rem"><div style="font-weight:700;color:var(--primary);margin-bottom:6px">🤖 AI Summary</div><div style="font-size:0.83rem;color:var(--text-muted);line-height:1.65">LSTM model identifies target bands. Sentiment reads ${aiPrediction.sentiment || 70}% positive. Combined verdict is ${aiPrediction.verdict || 'HOLD'} with ${aiPrediction.confidence || 80}% certainty.</div></div>
+      
+      <!-- Prediction History -->
+      <div style="background:rgba(255, 255, 255, 0.01);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem">
+        <div style="font-weight:700;color:var(--white);margin-bottom:0.75rem;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">🤖 Historical AI Rulings</div>
+        ${predictionHistory.length === 0 ? '<div style="font-size:0.8rem;color:var(--text-muted)">No prediction history available yet.</div>' : `
+          <div style="display:flex;flex-direction:column;gap:0.50rem">
+            ${predictionHistory.map(h => {
+              const dt = new Date(h.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+              const vClass = h.verdict === 'BUY' ? 'buy' : h.verdict === 'HOLD' ? 'hold' : 'avoid';
+              return `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.8rem">
+                  <span style="color:var(--text-muted)">${dt}</span>
+                  <div style="display:flex;align-items:center;gap:0.75rem">
+                    <span style="font-family:var(--font-mono);color:var(--text-dim)">Score: ${h.ensemble}%</span>
+                    <span class="badge badge-${vClass}" style="padding:0.15rem 0.5rem;font-size:0.65rem">${h.verdict}</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+      </div>
     </div>`
   };
   content.innerHTML = tabs[tab] || tabs.about;

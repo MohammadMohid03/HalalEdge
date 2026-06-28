@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from typing import List
+
 
 from backend.database import get_db
 from backend.models.prediction import Prediction
@@ -37,6 +39,9 @@ def get_prediction(symbol: str, db: Session = Depends(get_db)):
         )
 
     # Save to database cache
+    # Fetch previous prediction first to check if verdict changed
+    prev_pred = db.query(Prediction).filter(Prediction.symbol == symbol_upper).order_by(Prediction.created_at.desc()).first()
+
     new_pred = Prediction(
         symbol=symbol_upper,
         verdict=ensemble_result["verdict"],
@@ -49,6 +54,40 @@ def get_prediction(symbol: str, db: Session = Depends(get_db)):
     db.add(new_pred)
     db.commit()
     db.refresh(new_pred)
+
+    # Check if verdict changed and send alerts
+    if prev_pred and prev_pred.verdict != new_pred.verdict:
+        from backend.models.watchlist import Watchlist
+        from backend.models.user import User
+        from backend.services.auth import send_simulated_email
+
+        subscribers = db.query(User).join(Watchlist, Watchlist.user_id == User.id).filter(
+            Watchlist.symbol == symbol_upper,
+            Watchlist.email_alerts == True
+        ).all()
+
+        for sub in subscribers:
+            alert_body = f"""Assalamu Alaikum {sub.full_name},
+
+This is an automated alert from HalalEdge. 
+
+The AI Verdict for your watchlisted stock {symbol_upper} has changed:
+
+Previous Verdict: {prev_pred.verdict}
+New AI Verdict: {new_pred.verdict} (Ensemble Score: {new_pred.ensemble}%, Confidence: {new_pred.confidence}%)
+
+You can view the detailed breakdown including LSTM price target and FinBERT news sentiment at:
+http://localhost:5500/stock.html?sym={symbol_upper}
+
+Regards,
+The HalalEdge AI Engine
+"""
+            send_simulated_email(
+                sub.email,
+                f"HalalEdge Alert: {symbol_upper} Verdict Changed to {new_pred.verdict}",
+                alert_body
+            )
+
     return new_pred
 
 
@@ -122,3 +161,13 @@ def get_shariah_detail(symbol: str, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(new_cache)
         return new_cache
+
+@router.get("/{symbol}/history", response_model=List[PredictionOut])
+def get_prediction_history(symbol: str, db: Session = Depends(get_db)):
+    """Return historical cached predictions for a given stock symbol to track accuracy."""
+    symbol_upper = symbol.upper().strip()
+    history = db.query(Prediction).filter(
+        Prediction.symbol == symbol_upper
+    ).order_by(Prediction.created_at.desc()).limit(10).all()
+    return history
+

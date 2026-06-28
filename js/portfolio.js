@@ -28,6 +28,20 @@ async function loadPortfolio() {
     updateSummaryUI(data);
     renderPortfolioTable();
     renderPieChart();
+    updateZakatUI();
+
+    // Fetch and render watchlist
+    try {
+      const watchRes = await fetch(`${window.HalalStocks.API_BASE}/watchlist/`, {
+        headers: window.HalalStocks.getAuthHeaders()
+      });
+      if (watchRes.ok) {
+        const watchData = await watchRes.json();
+        renderWatchlistTable(watchData);
+      }
+    } catch (e) {
+      console.error('Error loading watchlist:', e);
+    }
   } catch (err) {
     console.error('Error loading portfolio:', err);
     window.HalalStocks.showToast('Backend connection error. Is the server running?', 'error');
@@ -240,8 +254,136 @@ window.exportPortfolio = function() {
   });
 };
 
+// ── Zakat Calculator Logic ────────────────────────────────────
+let currentZakatMethod = 'nav';
+
+window.setZakatMethod = function(method) {
+  currentZakatMethod = method;
+  const btnNav = document.getElementById('btnZakatNav');
+  const btnTrade = document.getElementById('btnZakatTrade');
+  
+  if (method === 'nav') {
+    btnNav.classList.add('active');
+    btnNav.style.borderColor = 'var(--primary)';
+    btnNav.style.color = 'var(--primary)';
+    
+    btnTrade.classList.remove('active');
+    btnTrade.style.borderColor = '';
+    btnTrade.style.color = '';
+  } else {
+    btnTrade.classList.add('active');
+    btnTrade.style.borderColor = 'var(--primary)';
+    btnTrade.style.color = 'var(--primary)';
+    
+    btnNav.classList.remove('active');
+    btnNav.style.borderColor = '';
+    btnNav.style.color = '';
+  }
+  updateZakatUI();
+};
+
+function updateZakatUI() {
+  const totalVal = portfolio.reduce((sum, h) => sum + h.total_value, 0);
+  const zakatableRatio = currentZakatMethod === 'nav' ? 0.25 : 1.0;
+  const zakatableValue = totalVal * zakatableRatio;
+  const ZakatDue = zakatableValue * 0.025;
+
+  const zakatableValEl = document.getElementById('zakatableVal');
+  const zakatDueEl = document.getElementById('zakatDue');
+
+  if (zakatableValEl) {
+    zakatableValEl.textContent = '$' + zakatableValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  if (zakatDueEl) {
+    zakatDueEl.textContent = '$' + ZakatDue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+}
+
+function renderWatchlistTable(items) {
+  const body = document.getElementById('watchlistBody');
+  const empty = document.getElementById('emptyWatchlist');
+  if (!body) return;
+
+  if (!items || items.length === 0) {
+    body.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  body.innerHTML = items.map((w) => {
+    const isUp = w.change >= 0;
+    const plClass = isUp ? 'price-up' : 'price-down';
+    const plSign = isUp ? '+' : '';
+    const scoreClass = w.ai_score >= 80 ? 'high' : w.ai_score >= 65 ? 'mid' : 'low';
+    const verdictClass = w.verdict === 'BUY' ? 'buy' : w.verdict === 'HOLD' ? 'hold' : 'avoid';
+    const shariahClass = w.shariah_status === 'Halal' ? 'halal' : 'doubtful';
+    const color = w.color || '#0ea5e9';
+
+    return `
+      <tr onclick="location.href='stock.html?sym=${w.symbol}'" style="cursor:pointer">
+        <td><div class="td-stock">
+          <div class="td-avatar" style="background:linear-gradient(135deg,${color}55,${color})">${w.symbol.slice(0,2)}</div>
+          <div><div class="td-symbol">${w.symbol}</div><div class="td-name">${w.name}</div></div>
+        </div></td>
+        <td style="font-family:var(--font-mono);color:var(--white)">$${w.price.toFixed(2)}</td>
+        <td class="${plClass}" style="font-family:var(--font-mono);font-weight:700">${isUp ? '▲' : '▼'} ${plSign}${w.change.toFixed(2)}%</td>
+        <td><span class="badge badge-${shariahClass}">${w.shariah_status === 'Halal' ? '✓' : '⚠'} ${w.shariah_status}</span></td>
+        <td><span class="badge badge-${verdictClass}">${w.verdict}</span></td>
+        <td><span class="ai-score-pill ${scoreClass}">${w.ai_score}%</span></td>
+        <td onclick="event.stopPropagation()">
+          <div style="display:flex;gap:0.75rem;align-items:center">
+            <button onclick="toggleWatchlistAlert('${w.symbol}')" title="${w.email_alerts ? 'Mute Email Alerts' : 'Enable Email Alerts'}" style="background:none;border:none;cursor:pointer;color:${w.email_alerts ? 'var(--gold)' : 'var(--text-muted)'};transition:color 0.2s">
+              <i class="${w.email_alerts ? 'fa-solid fa-bell' : 'fa-regular fa-bell'}"></i>
+            </button>
+            <div class="remove-btn" onclick="removeFromWatchlist('${w.symbol}')" title="Remove from Watchlist">
+              <i class="fa fa-trash"></i>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+window.toggleWatchlistAlert = async function(sym) {
+  try {
+    const res = await fetch(`${window.HalalStocks.API_BASE}/watchlist/${sym}/toggle-alert`, {
+      method: 'POST',
+      headers: window.HalalStocks.getAuthHeaders()
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.HalalStocks?.showToast(data.email_alerts ? `Alerts enabled for ${sym}` : `Alerts muted for ${sym}`, 'success');
+      loadPortfolio();
+    } else {
+      window.HalalStocks?.showToast('Failed to toggle alert status', 'error');
+    }
+  } catch (err) {
+    window.HalalStocks?.showToast('Error connecting to backend.', 'error');
+  }
+};
+
+window.removeFromWatchlist = async function(sym) {
+  try {
+    const res = await fetch(`${window.HalalStocks.API_BASE}/watchlist/${sym}`, {
+      method: 'DELETE',
+      headers: window.HalalStocks.getAuthHeaders()
+    });
+    if (res.ok) {
+      window.HalalStocks?.showToast(`${sym} removed from watchlist`, 'error');
+      loadPortfolio();
+    } else {
+      window.HalalStocks?.showToast('Failed to remove from watchlist', 'error');
+    }
+  } catch (err) {
+    window.HalalStocks?.showToast('Error connecting to backend.', 'error');
+  }
+};
+
 // ── Init ──────────────────────────────────────────────────────
 loadPortfolio();
 
 // ── Live price updates ────────────────────────────────────────
 setInterval(() => { loadPortfolio(); }, 5000);
+
+

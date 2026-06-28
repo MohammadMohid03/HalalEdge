@@ -8,6 +8,11 @@ class StockSearchItem(BaseModel):
     change: float
     sector: str
     shariah_status: str
+    ai_score: int
+    verdict: str
+    email_alerts: Optional[bool] = False
+
+
 
 class StockDetailOut(BaseModel):
     symbol: str

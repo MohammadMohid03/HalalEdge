@@ -24,7 +24,10 @@ def get_watchlist(current_user: User = Depends(get_current_user), db: Session = 
             "price": info["price"],
             "change": info["change_pct"],
             "sector": info["sector"],
-            "shariah_status": info["shariah_status"]
+            "shariah_status": info["shariah_status"],
+            "ai_score": info["ai_score"],
+            "verdict": info["verdict"],
+            "email_alerts": item.email_alerts
         })
     return results
 
@@ -83,3 +86,27 @@ def delete_from_watchlist(
     db.delete(item)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{symbol}/toggle-alert", response_model=WatchlistOut)
+def toggle_watchlist_alert(
+    symbol: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    symbol_upper = symbol.upper().strip()
+    item = db.query(Watchlist).filter(
+        Watchlist.user_id == current_user.id,
+        Watchlist.symbol == symbol_upper
+    ).first()
+    
+    if not item:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Stock not found in watchlist"
+        )
+        
+    item.email_alerts = not item.email_alerts
+    db.commit()
+    db.refresh(item)
+    return item
+

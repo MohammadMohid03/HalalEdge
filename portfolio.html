@@ -80,6 +80,26 @@
         </div>
       </div>
 
+      <!-- Watchlist Card -->
+      <div class="holdings-card" style="margin-top: 1.5rem">
+        <div class="holdings-header">
+          <div class="holdings-title">👁 Watchlist</div>
+          <span class="ai-badge-live" style="background:var(--primary-dark)">AI Scores</span>
+        </div>
+        <table class="holdings-table">
+          <thead><tr>
+            <th>Stock</th><th>Price</th><th>24h %</th><th>Compliance</th><th>AI Rating</th><th>AI Score</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="watchlistBody"></tbody>
+        </table>
+        <div id="emptyWatchlist" style="padding:3rem;text-align:center;color:var(--text-muted)">
+          <div style="font-size:2.5rem;margin-bottom:0.75rem">👁</div>
+          <div style="font-weight:600;color:var(--white);margin-bottom:0.4rem">Your watchlist is empty</div>
+          <div style="font-size:0.82rem">Search stocks in the Screener and click "Add to Watchlist" to track them.</div>
+        </div>
+      </div>
+
+
       <!-- Right column -->
       <div style="display:flex;flex-direction:column;gap:1.25rem">
         <!-- Pie chart -->
@@ -88,6 +108,39 @@
           <div class="pie-canvas-wrap"><canvas id="pieChart" width="200" height="200"></canvas></div>
           <div class="pie-legend" id="pieLegend"><div style="font-size:0.82rem;color:var(--text-muted);text-align:center">Add stocks to see allocation</div></div>
         </div>
+
+        <!-- Zakat Calculator Card -->
+        <div class="card reveal" id="zakatCard" style="margin-top: 1.25rem">
+          <div style="font-family:var(--font-display);font-weight:700;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:8px"><span>🕌</span> Zakat Calculator</div>
+          
+          <div style="font-size:0.8rem;color:var(--text-muted);line-height:1.55;margin-bottom:1.25rem">
+            Calculate the Zakat due on your stock holdings based on contemporary Shariah rulings.
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:1.25rem">
+            <button class="btn-outline active" id="btnZakatNav" onclick="setZakatMethod('nav')" style="font-size:0.72rem;padding:0.5rem 0.25rem;justify-content:center;border-color:var(--primary);color:var(--primary)">Net Zakatable (NAV)</button>
+            <button class="btn-outline" id="btnZakatTrade" onclick="setZakatMethod('trade')" style="font-size:0.72rem;padding:0.5rem 0.25rem;justify-content:center">Trading Intent</button>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1.25rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+              <span style="font-size:0.82rem;color:var(--text-muted)">Zakatable Value:</span>
+              <span id="zakatableVal" style="font-family:var(--font-mono);font-weight:700;color:var(--white)">$0.00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:0.82rem;color:var(--text-muted)">Zakat Due (2.5%):</span>
+              <span id="zakatDue" style="font-family:var(--font-mono);font-weight:800;color:var(--gold);font-size:1.15rem">$0.00</span>
+            </div>
+          </div>
+
+          <div style="font-size:0.68rem;color:var(--text-muted);line-height:1.45">
+            <i class="fa fa-info-circle" style="color:var(--primary)"></i> 
+            <strong>Net Zakatable (NAV) Method:</strong> Best for long-term investors. Zakat is calculated only on the underlying liquid zakatable assets of the companies (estimated at a standard 25% proxy of the market value) at 2.5% (effective rate: 0.625%).
+            <br><br>
+            <strong>Trading Method:</strong> Best for active traders. Zakat is due on the full 100% market value of your portfolio at 2.5%.
+          </div>
+        </div>
+
 
         <!-- AI Recommendations -->
         <div class="card">

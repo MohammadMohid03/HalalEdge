@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, ForeignKey, func, UUID
+from sqlalchemy import Column, String, DateTime, ForeignKey, func, UUID, Boolean
 from backend.database import Base
 
 class Watchlist(Base):
@@ -9,3 +9,5 @@ class Watchlist(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     symbol = Column(String(10), nullable=False)
     added_at = Column(DateTime, server_default=func.now())
+    email_alerts = Column(Boolean, default=False)
+

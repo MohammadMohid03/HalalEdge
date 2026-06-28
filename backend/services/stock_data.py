@@ -45,13 +45,29 @@ def get_stock_info(symbol: str) -> dict:
         if datetime.now() - cached_time < timedelta(minutes=5):
             return cached_val
 
-    metadata = STOCK_METADATA.get(symbol_upper, {
-        "name": symbol_upper,
-        "sector": "Unknown",
-        "color": "#0ea5e9",
-        "ai_score": 70,
-        "verdict": "HOLD"
-    })
+    metadata = STOCK_METADATA.get(symbol_upper, {})
+    name = metadata.get("name", symbol_upper)
+    sector = metadata.get("sector", "Unknown")
+    color = metadata.get("color", "#0ea5e9")
+    ai_score = metadata.get("ai_score", 70)
+    verdict = metadata.get("verdict", "HOLD")
+
+    # Try to load real AI score and verdict from database cache if available
+    if symbol_upper not in STOCK_METADATA:
+        try:
+            from backend.database import SessionLocal
+            from backend.models.prediction import Prediction
+            db = SessionLocal()
+            cached_pred = db.query(Prediction).filter(
+                Prediction.symbol == symbol_upper
+            ).order_by(Prediction.created_at.desc()).first()
+            if cached_pred:
+                ai_score = cached_pred.ensemble
+                verdict = cached_pred.verdict
+            db.close()
+        except Exception as e:
+            print(f"Error querying prediction cache for {symbol_upper}: {e}")
+
 
     # Fetch dynamic data from yfinance
     price = 100.0
@@ -115,9 +131,9 @@ def get_stock_info(symbol: str) -> dict:
         "industry": industry,
         "shariah_status": shariah["status"],
         "shariah_score": shariah["score"],
-        "ai_score": metadata["ai_score"],
-        "verdict": metadata["verdict"],
-        "color": metadata["color"]
+        "ai_score": ai_score,
+        "verdict": verdict,
+        "color": color
     }
 
     _stock_info_cache[symbol_upper] = (datetime.now(), res)
@@ -202,7 +218,9 @@ def search_stocks(query: str) -> List[dict]:
                 "price": info["price"],
                 "change": info["change_pct"],
                 "sector": meta["sector"],
-                "shariah_status": info["shariah_status"]
+                "shariah_status": info["shariah_status"],
+                "ai_score": info["ai_score"],
+                "verdict": info["verdict"]
             })
             
     if len(results) >= 5:
@@ -221,7 +239,9 @@ def search_stocks(query: str) -> List[dict]:
                     "price": info["price"],
                     "change": info["change_pct"],
                     "sector": info["sector"],
-                    "shariah_status": info["shariah_status"]
+                    "shariah_status": info["shariah_status"],
+                    "ai_score": info["ai_score"],
+                    "verdict": info["verdict"]
                 })
     except Exception:
         pass
