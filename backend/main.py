@@ -20,8 +20,8 @@ except Exception as e:
     print(f"Error initializing database tables: {e}")
 
 app = FastAPI(
-    title="NoorInvest API",
-    description="Backend API for NoorInvest (HalalEdge) Stock Screener, Portfolio Tracker & AI Predictor",
+    title="HalalEdge API",
+    description="Backend API for HalalEdge Stock Screener, Portfolio Tracker & AI Predictor",
     version="1.0.0"
 )
 
@@ -31,7 +31,7 @@ app.add_middleware(
     allow_origins=[
         "*",
         "https://halaledge.vercel.app",
-        "https://halaledge-api.onrender.com",
+        "https://halaledge.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -49,6 +49,6 @@ app.include_router(predictions.router, prefix="/api")
 def read_root():
     return {
         "status": "online",
-        "service": "NoorInvest API",
+        "service": "HalalEdge API",
         "version": "1.0.0"
     }
