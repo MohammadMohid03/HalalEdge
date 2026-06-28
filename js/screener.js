@@ -190,9 +190,11 @@ async function fetchBatchData(symbols) {
   if (symbols.length === 0) return [];
   const symStr = symbols.join(',');
   try {
-    const res = await fetch(`${window.HalalStocks.API_BASE}/stocks/batch-data?symbols=${encodeURIComponent(symStr)}`, {
-      headers: window.HalalStocks.getAuthHeaders()
-    });
+    const res = await window.HalalStocks.fetchWithTimeout(
+      `${window.HalalStocks.API_BASE}/stocks/batch-data?symbols=${encodeURIComponent(symStr)}`,
+      { headers: window.HalalStocks.getAuthHeaders() },
+      60000
+    );
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
@@ -251,9 +253,11 @@ async function enrichVisibleStocks() {
 async function initScreener() {
   showScreenerLoading();
   try {
-    const res = await fetch(`${window.HalalStocks.API_BASE}/stocks/screener`, {
-      headers: window.HalalStocks.getAuthHeaders()
-    });
+    const res = await window.HalalStocks.fetchWithTimeout(
+      `${window.HalalStocks.API_BASE}/stocks/screener`,
+      { headers: window.HalalStocks.getAuthHeaders() },
+      90000
+    );
     if (res.ok) {
       const data = await res.json();
       allStocks = data.map(s => ({

@@ -173,7 +173,7 @@ function updateAuthNavbar() {
 window.HalalStocks = {
   API_BASE: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:8000/api'
-      : 'https://halaledge.onrender.com/api',
+      : 'https://halaledge-api.onrender.com/api',
   showToast,
   animateCounter,
   formatPrice: (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
@@ -187,6 +187,18 @@ window.HalalStocks = {
   getAuthHeaders: () => {
     const token = localStorage.getItem('token');
     return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+  },
+  fetchWithTimeout: async (url, options = {}, timeoutMs = 60000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(timeoutId);
+      return res;
+    } catch (err) {
+      clearTimeout(timeoutId);
+      throw err;
+    }
   },
   logout: () => {
     localStorage.removeItem('token');
