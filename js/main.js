@@ -184,6 +184,11 @@ window.HalalStocks = {
     if (n >= 1e6)  return '$' + (n / 1e6).toFixed(1) + 'M';
     return '$' + n.toLocaleString();
   },
+  formatMarketCap: (billions) => {
+    if (!billions || billions === 0) return 'N/A';
+    if (billions >= 1000) return '$' + (billions / 1000).toFixed(2) + 'T';
+    return '$' + Number(billions).toFixed(2) + 'B';
+  },
   getAuthHeaders: () => {
     const token = localStorage.getItem('token');
     return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };

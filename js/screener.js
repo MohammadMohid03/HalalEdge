@@ -20,7 +20,7 @@ function renderTable() {
     const scoreClass = s.aiScore >= 80 ? 'high' : s.aiScore >= 65 ? 'mid' : 'low';
     const verdictClass = s.verdict === 'BUY' ? 'buy' : s.verdict === 'HOLD' ? 'hold' : 'avoid';
     const shClass = s.shariah === 'Halal' ? 'halal' : 'doubtful';
-    const mcStr = loading ? '···' : !s.marketcap ? 'N/A' : s.marketcap >= 1000 ? '$' + (s.marketcap/1000).toFixed(1) + 'T' : '$' + s.marketcap + 'B';
+    const mcStr = loading ? '···' : window.HalalStocks.formatMarketCap(s.marketcap);
     const sparkColor = s.change >= 0 ? '#10b981' : '#ef4444';
     const trendPath = buildSparkPath(s.trend);
     return `
@@ -210,28 +210,39 @@ let enrichRequestId = 0;
 const BATCH_SIZE = 50;
 
 // ── Loading & Error states ─────────────────────────────────────
+function skeletonTableRow() {
+  return `
+    <tr class="skeleton-row">
+      <td><div class="td-stock"><div class="skeleton-avatar"></div><div style="display:flex;flex-direction:column;gap:6px"><div class="skeleton-text" style="width:60px"></div><div class="skeleton-text" style="width:100px"></div></div></div></td>
+      <td><div class="skeleton-text" style="width:55px"></div></td>
+      <td><div class="skeleton-text" style="width:60px"></div></td>
+      <td><div class="skeleton-text" style="width:60px"></div></td>
+      <td><div class="skeleton-pill"></div></td>
+      <td><div class="skeleton-badge"></div></td>
+      <td><div class="skeleton-badge"></div></td>
+      <td><div class="skeleton-text" style="width:70px"></div></td>
+      <td><div class="skeleton-tag"></div></td>
+    </tr>`;
+}
+
+function skeletonGridCard() {
+  return `
+    <div class="stock-card skeleton-card">
+      <div class="sc-header">
+        <div class="sc-identity"><div class="skeleton-avatar"></div><div style="display:flex;flex-direction:column;gap:6px"><div class="skeleton-text" style="width:60px"></div><div class="skeleton-text" style="width:110px"></div></div></div>
+        <div class="skeleton-badge"></div>
+      </div>
+      <div class="sc-chart" style="justify-content:center"><div class="skeleton-text" style="width:80%"></div></div>
+      <div class="sc-price-row"><div class="skeleton-text" style="width:70px"></div><div class="skeleton-text" style="width:60px"></div></div>
+      <div class="sc-footer"><div class="skeleton-badge"></div><div class="skeleton-text" style="width:50px"></div><div class="skeleton-tag"></div></div>
+    </div>`;
+}
+
 function showScreenerLoading() {
   const tbody = document.getElementById('stockTableBody');
   const grid = document.getElementById('gridView');
-  const loaderHtml = `
-    <tr>
-      <td colspan="9" style="text-align:center; padding:3rem 1rem">
-        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem">
-          <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
-          <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
-        </div>
-      </td>
-    </tr>
-  `;
-  if (tbody) tbody.innerHTML = loaderHtml;
-  if (grid) {
-    grid.innerHTML = `
-      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 1rem; gap:1rem">
-        <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
-        <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
-      </div>
-    `;
-  }
+  if (tbody) tbody.innerHTML = Array.from({ length: 10 }, skeletonTableRow).join('');
+  if (grid) grid.innerHTML = Array.from({ length: 9 }, skeletonGridCard).join('');
 }
 
 function showScreenerError() {
