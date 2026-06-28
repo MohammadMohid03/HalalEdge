@@ -31,6 +31,7 @@ class StockDetailOut(BaseModel):
     shariah_score: int
     ai_score: int
     verdict: str
+    color: Optional[str] = None
 
 class StockHistoryItem(BaseModel):
     date: str

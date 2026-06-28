@@ -171,7 +171,7 @@ function updateHeaderUI() {
     tagsEl.innerHTML = `
       <span class="badge ${badgeClass}">${checkSign} ${companyDetails.shariah_status}</span>
       <span class="tag">${companyDetails.sector}</span>
-      <span class="tag">${companyDetails.market_cap >= 100e9 ? 'Large Cap' : 'Mid Cap'}</span>
+      <span class="tag">${companyDetails.market_cap >= 100e9 ? 'Large Cap' : companyDetails.market_cap ? 'Mid Cap' : 'N/A'}</span>
     `;
   }
 
@@ -193,9 +193,11 @@ function updateStatsGridUI() {
   const gridEl = document.querySelector('.stats-grid-card');
   if (!gridEl) return;
 
-  const fmtCap = window.HalalStocks.formatBigNum(companyDetails.market_cap || 0);
+  const fmtCap = companyDetails.market_cap ? window.HalalStocks.formatBigNum(companyDetails.market_cap) : 'N/A';
   const pe = companyDetails.pe_ratio ? `${companyDetails.pe_ratio}x` : 'N/A';
   const vol = companyDetails.volume ? `${(companyDetails.volume / 1e6).toFixed(1)}M` : 'N/A';
+  const high52 = companyDetails.fifty_two_week_high ? `$${companyDetails.fifty_two_week_high.toFixed(2)}` : 'N/A';
+  const low52 = companyDetails.fifty_two_week_low ? `$${companyDetails.fifty_two_week_low.toFixed(2)}` : 'N/A';
 
   gridEl.innerHTML = `
     <div class="stat-cell"><div class="stat-cell-label">Open</div><div class="stat-cell-value">$${(companyDetails.price * 0.99).toFixed(2)}</div></div>
@@ -204,8 +206,8 @@ function updateStatsGridUI() {
     <div class="stat-cell"><div class="stat-cell-label">Volume</div><div class="stat-cell-value">${vol}</div></div>
     <div class="stat-cell"><div class="stat-cell-label">Market Cap</div><div class="stat-cell-value">${fmtCap}</div></div>
     <div class="stat-cell"><div class="stat-cell-label">P/E Ratio</div><div class="stat-cell-value">${pe}</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">52W High</div><div class="stat-cell-value">$${companyDetails.fifty_two_week_high.toFixed(2)}</div></div>
-    <div class="stat-cell"><div class="stat-cell-label">52W Low</div><div class="stat-cell-value">$${companyDetails.fifty_two_week_low.toFixed(2)}</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">52W High</div><div class="stat-cell-value">${high52}</div></div>
+    <div class="stat-cell"><div class="stat-cell-label">52W Low</div><div class="stat-cell-value">${low52}</div></div>
   `;
 }
 

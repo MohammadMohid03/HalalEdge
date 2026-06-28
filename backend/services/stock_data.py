@@ -89,8 +89,7 @@ def get_stock_info(symbol: str) -> dict:
     volume = 100000.0
     fifty_two_w_high = 120.0
     fifty_two_w_low = 80.0
-    industry = "General Services"
-    sector = metadata["sector"]
+    industry = metadata.get("industry", "General Services")
 
     try:
         ticker = yf.Ticker(symbol_upper)
@@ -114,14 +113,14 @@ def get_stock_info(symbol: str) -> dict:
         fifty_two_w_low = info.get("fiftyTwoWeekLow") or fifty_two_w_low
         industry = info.get("industry") or industry
         sector = info.get("sector") or sector
-        name = info.get("longName") or info.get("shortName") or metadata["name"]
+        name = info.get("longName") or info.get("shortName") or metadata.get("name", name)
     except Exception as e:
         print(f"Error fetching yfinance for {symbol_upper}: {e}")
         # Fallbacks for mock data prices
         if symbol_upper in STOCK_METADATA:
             # Simple pseudo-live price simulation if offline
             price = 150.0
-            name = metadata["name"]
+            name = metadata.get("name", symbol_upper)
         else:
             name = symbol_upper
 
@@ -406,6 +405,41 @@ def _get_batch_prices(symbols: List[str]) -> dict:
     return result
 
 
+def _fetch_single_stock_detail(symbol: str) -> dict:
+    """Fetch market_cap, PE, 52w high/low, sector, industry, name from yfinance .info for one symbol."""
+    try:
+        info = yf.Ticker(symbol).info
+        return {
+            "market_cap": info.get("marketCap"),
+            "pe_ratio": info.get("trailingPE"),
+            "fifty_two_week_high": info.get("fiftyTwoWeekHigh"),
+            "fifty_two_week_low": info.get("fiftyTwoWeekLow"),
+            "sector": info.get("sector"),
+            "industry": info.get("industry"),
+            "name": info.get("longName") or info.get("shortName"),
+        }
+    except Exception:
+        return {}
+
+
+def _get_batch_stock_details(symbols: List[str]) -> dict:
+    """Fetch stock details (market cap, PE, 52w range, etc.) for many tickers in parallel."""
+    if not symbols:
+        return {}
+    result = {}
+    with ThreadPoolExecutor(max_workers=30) as ex:
+        futures = {ex.submit(_fetch_single_stock_detail, sym): sym for sym in symbols}
+        for future in futures:
+            sym = futures[future]
+            try:
+                details = future.result()
+                if details:
+                    result[sym] = details
+            except Exception:
+                continue
+    return result
+
+
 def _shariah_heuristic(gics_sector: str, industry: str) -> dict:
     """Lightweight shariah estimate from GICS sector/sub-industry (no yfinance call)."""
     sector_lower = gics_sector.lower()
@@ -437,7 +471,9 @@ def _get_extended_screener_stocks() -> List[dict]:
     if not extended:
         return []
 
-    batch_prices = _get_batch_prices([c["symbol"] for c in extended])
+    symbols = [c["symbol"] for c in extended]
+    batch_prices = _get_batch_prices(symbols)
+    batch_details = _get_batch_stock_details(symbols)
 
     results = []
     for c in extended:
@@ -445,22 +481,28 @@ def _get_extended_screener_stocks() -> List[dict]:
         px = batch_prices.get(sym)
         if not px:
             continue
+        det = batch_details.get(sym, {})
         mapped_sector = _GICS_SECTOR_MAP.get(c["gics_sector"], c["gics_sector"] or "Unknown")
+        sector = det.get("sector") or mapped_sector
         sh = _shariah_heuristic(c["gics_sector"], c["industry"])
         ai_score, verdict = _ai_score_from_momentum(px["change_pct"])
+        market_cap = det.get("market_cap")
+        fifty_two_w_high = det.get("fifty_two_week_high")
+        fifty_two_w_low = det.get("fifty_two_week_low")
+        pe_ratio = det.get("pe_ratio")
         results.append({
             "symbol": sym,
-            "name": c["name"],
+            "name": det.get("name") or c["name"],
             "price": px["price"],
             "change": px["change"],
             "change_pct": px["change_pct"],
-            "market_cap": None,
-            "pe_ratio": None,
+            "market_cap": market_cap if market_cap else None,
+            "pe_ratio": round(float(pe_ratio), 2) if pe_ratio else None,
             "volume": px["volume"],
-            "fifty_two_week_high": None,
-            "fifty_two_week_low": None,
-            "sector": mapped_sector,
-            "industry": c["industry"] or mapped_sector,
+            "fifty_two_week_high": round(float(fifty_two_w_high), 2) if fifty_two_w_high else None,
+            "fifty_two_week_low": round(float(fifty_two_w_low), 2) if fifty_two_w_low else None,
+            "sector": sector,
+            "industry": det.get("industry") or c["industry"] or sector,
             "shariah_status": sh["status"],
             "shariah_score": sh["score"],
             "ai_score": ai_score,

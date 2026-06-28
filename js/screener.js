@@ -19,7 +19,7 @@ function renderTable() {
     const scoreClass = s.aiScore >= 80 ? 'high' : s.aiScore >= 65 ? 'mid' : 'low';
     const verdictClass = s.verdict === 'BUY' ? 'buy' : s.verdict === 'HOLD' ? 'hold' : 'avoid';
     const shClass = s.shariah === 'Halal' ? 'halal' : 'doubtful';
-    const mcStr = s.marketcap >= 1000 ? '$' + (s.marketcap/1000).toFixed(1) + 'T' : '$' + s.marketcap + 'B';
+    const mcStr = !s.marketcap ? 'N/A' : s.marketcap >= 1000 ? '$' + (s.marketcap/1000).toFixed(1) + 'T' : '$' + s.marketcap + 'B';
     const sparkColor = s.change >= 0 ? '#10b981' : '#ef4444';
     const trendPath = buildSparkPath(s.trend);
     return `
