@@ -39,3 +39,7 @@ models_cache/
 # Transformers cache
 .cache/
 huggingface/
+
+# Email simulations log
+simulated_emails.log
+

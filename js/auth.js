@@ -278,3 +278,46 @@ document.getElementById('loginPassword')?.addEventListener('blur', validateLogin
 document.getElementById('fullName')?.addEventListener('blur', validateName);
 document.getElementById('signupEmail')?.addEventListener('blur', validateEmail);
 document.getElementById('confirmPassword')?.addEventListener('blur', validateConfirm);
+
+// ── Forgot Password Flow ──────────────────────────────────────
+window.openForgotModal = function(e) {
+  if (e) e.preventDefault();
+  const modal = document.getElementById('forgotPasswordModal');
+  if (modal) modal.style.display = 'flex';
+};
+
+window.closeForgotModal = function() {
+  const modal = document.getElementById('forgotPasswordModal');
+  if (modal) modal.style.display = 'none';
+};
+
+window.handleForgotPassword = async function(e) {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail')?.value.trim();
+  if (!email) return;
+
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    const res = await fetch(`${window.HalalStocks.API_BASE}/auth/forgot-password?email=${encodeURIComponent(email)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await res.json();
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+
+    if (res.ok) {
+      window.HalalStocks?.showToast('If the email exists, a reset link has been sent. Check simulated_emails.log.', 'success');
+      closeForgotModal();
+    } else {
+      window.HalalStocks?.showToast(data.detail || 'Failed to send reset link.', 'error');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Send Reset Link';
+    window.HalalStocks?.showToast('Error connecting to backend.', 'error');
+  }
+};

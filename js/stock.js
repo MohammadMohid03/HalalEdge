@@ -18,6 +18,57 @@ function updateTimestamp() {
 updateTimestamp();
 
 // ── Load Stock Data from APIs ─────────────────────────────────
+function showPredictionLoading() {
+  const body = document.querySelector('.ai-pred-card .ai-pred-body');
+  if (body) {
+    body.innerHTML = `
+      <div class="ai-loading-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1rem; text-align:center; gap:1.25rem">
+        <div class="ai-spinner" style="width:40px; height:40px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
+        <div>
+          <div style="font-weight:700; color:var(--white); font-size:0.95rem; margin-bottom:0.4rem">Running AI Prediction Pipeline</div>
+          <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.55; max-width:260px; margin:0 auto">Training LSTM price models and analyzing live news headlines with FinBERT NLP.<br><span style="color:var(--gold); font-weight:600; display:block; margin-top:0.5rem">First run may take 3-5 minutes while models download...</span></div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function showPredictionError(errMsg) {
+  const body = document.querySelector('.ai-pred-card .ai-pred-body');
+  if (body) {
+    body.innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2rem 1rem; text-align:center; gap:1rem">
+        <div style="width:48px; height:48px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:1.5rem">⚠</div>
+        <div>
+          <div style="font-weight:700; color:var(--white); font-size:0.9rem; margin-bottom:0.25rem">AI Prediction Unavailable</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.4">${errMsg || 'An error occurred while generating prediction.'}</div>
+        </div>
+        <button class="btn-outline" onclick="loadStockDetails()" style="font-size:0.75rem; padding:0.5rem 1rem; margin-top:0.5rem">
+          <i class="fa fa-sync-alt"></i> Retry Prediction
+        </button>
+      </div>
+    `;
+  }
+}
+
+function showStockPageError() {
+  const body = document.querySelector('.stock-body');
+  if (body) {
+    body.innerHTML = `
+      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5rem 2rem; text-align:center; gap:1.5rem; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-lg)">
+        <div style="width:64px; height:64px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:2rem">⚠</div>
+        <div>
+          <h2 style="font-family:var(--font-display); font-size:1.5rem; font-weight:800; color:var(--white); margin-bottom:0.5rem">Failed to Load Stock Data</h2>
+          <p style="color:var(--text-muted); max-width:400px; margin:0 auto; font-size:0.9rem; line-height:1.6">We couldn't connect to the server to fetch live stock data for ${symbol}. Please check your internet connection or verify the backend is running.</p>
+        </div>
+        <button class="btn-primary" onclick="loadStockDetails()" style="padding:0.75rem 1.5rem; font-size:0.9rem">
+          <i class="fa fa-sync-alt"></i> Retry Connection
+        </button>
+      </div>
+    `;
+  }
+}
+
 async function loadStockDetails() {
   try {
     // 1. Fetch details & stats
@@ -32,30 +83,50 @@ async function loadStockDetails() {
     companyDetails = await detailsRes.json();
     currentPrice = companyDetails.price;
 
-    // 2. Fetch AI Predictions
-    const predRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}`);
-    if (predRes.ok) {
-      aiPrediction = await predRes.json();
-    }
-
-    // 3. Fetch Shariah parameter details
-    const shariahRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/shariah`);
-    if (shariahRes.ok) {
-      shariahDetail = await shariahRes.json();
-    }
-
-    // Update UI elements
+    // Update Header and Stats immediately to keep page responsive
     updateHeaderUI();
     updateStatsGridUI();
     updateTabsUI('about');
-    updatePredictionUI();
-    updateShariahUI();
     updateNewsUI();
+
+    // Show loading state for AI prediction
+    showPredictionLoading();
+
+    // 2. Fetch AI Predictions
+    try {
+      const predRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}`, {
+        headers: window.HalalStocks.getAuthHeaders()
+      });
+      if (predRes.ok) {
+        aiPrediction = await predRes.json();
+        updatePredictionUI();
+      } else {
+        const errorData = await predRes.json().catch(() => ({}));
+        showPredictionError(errorData.detail || 'Failed to generate prediction.');
+      }
+    } catch (e) {
+      console.error('Error fetching prediction:', e);
+      showPredictionError('Network timeout or connection lost.');
+    }
+
+    // 3. Fetch Shariah parameter details
+    try {
+      const shariahRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/shariah`, {
+        headers: window.HalalStocks.getAuthHeaders()
+      });
+      if (shariahRes.ok) {
+        shariahDetail = await shariahRes.json();
+        updateShariahUI();
+      }
+    } catch (e) {
+      console.error('Error fetching Shariah details:', e);
+    }
   } catch (err) {
     console.error('Error fetching stock details:', err);
-    window.HalalStocks?.showToast('Error connecting to backend.', 'error');
+    showStockPageError();
   }
 }
+
 
 // ── Dynamic UI Updaters ───────────────────────────────────────
 function updateHeaderUI() {

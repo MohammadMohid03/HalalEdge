@@ -59,3 +59,16 @@ def get_current_user(
     if user is None:
         raise credentials_exception
     return user
+
+def send_simulated_email(to_email: str, subject: str, body: str):
+    import os
+    log_path = r"C:\Users\moham\Desktop\Stock_Predictor\simulated_emails.log"
+    with open(log_path, "a", encoding="utf-8") as f:
+        f.write("="*60 + "\n")
+        f.write(f"TIMESTAMP: {datetime.utcnow().isoformat()}\n")
+        f.write(f"TO: {to_email}\n")
+        f.write(f"SUBJECT: {subject}\n")
+        f.write(f"BODY:\n{body}\n")
+        f.write("="*60 + "\n\n")
+    print(f"[auth] Simulated email sent to {to_email} with subject '{subject}'. Check simulated_emails.log")
+

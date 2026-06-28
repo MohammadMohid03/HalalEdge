@@ -12,3 +12,7 @@ class User(Base):
     country = Column(String(100), nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String(255), nullable=True)
+    reset_token = Column(String(255), nullable=True)
+

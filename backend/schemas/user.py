@@ -25,9 +25,11 @@ class UserOut(UserBase):
     id: UUID
     created_at: datetime
     is_active: bool
+    is_verified: bool
 
     class Config:
         from_attributes = True
+
 
 class Token(BaseModel):
     access_token: str

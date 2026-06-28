@@ -206,7 +206,68 @@ window.setView = function(view, el) {
 };
 
 // ── Init ──────────────────────────────────────────────────────
+function showScreenerLoading() {
+  const tbody = document.getElementById('stockTableBody');
+  const grid = document.getElementById('gridView');
+  const loaderHtml = `
+    <tr>
+      <td colspan="9" style="text-align:center; padding:3rem 1rem">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem">
+          <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
+          <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
+        </div>
+      </td>
+    </tr>
+  `;
+  if (tbody) tbody.innerHTML = loaderHtml;
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 1rem; gap:1rem">
+        <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
+        <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
+      </div>
+    `;
+  }
+}
+
+function showScreenerError() {
+  const tbody = document.getElementById('stockTableBody');
+  const grid = document.getElementById('gridView');
+  const errorHtml = `
+    <tr>
+      <td colspan="9" style="text-align:center; padding:3rem 1rem">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem">
+          <div style="width:40px; height:40px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:1.25rem">⚠</div>
+          <div>
+            <div style="font-weight:700; color:var(--white); font-size:0.9rem">Connection Failed</div>
+            <div style="font-size:0.75rem; color:var(--text-muted)">Could not connect to the backend server.</div>
+          </div>
+          <button class="btn-outline" onclick="initScreener()" style="font-size:0.75rem; padding:0.5rem 1rem">
+            <i class="fa fa-sync-alt"></i> Retry Connection
+          </button>
+        </div>
+      </td>
+    </tr>
+  `;
+  if (tbody) tbody.innerHTML = errorHtml;
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 1rem; gap:1rem; border:1px solid var(--border); border-radius:var(--radius); background:var(--card)">
+        <div style="width:40px; height:40px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:1.25rem">⚠</div>
+        <div style="text-align:center">
+          <div style="font-weight:700; color:var(--white); font-size:0.9rem">Connection Failed</div>
+          <div style="font-size:0.75rem; color:var(--text-muted)">Could not connect to the backend server.</div>
+        </div>
+        <button class="btn-outline" onclick="initScreener()" style="font-size:0.75rem; padding:0.5rem 1rem">
+          <i class="fa fa-sync-alt"></i> Retry Connection
+        </button>
+      </div>
+    `;
+  }
+}
+
 async function initScreener() {
+  showScreenerLoading();
   try {
     const res = await fetch(`${window.HalalStocks.API_BASE}/stocks/screener`, {
       headers: window.HalalStocks.getAuthHeaders()
@@ -222,18 +283,18 @@ async function initScreener() {
         verdict: s.verdict,
         shariah: s.shariah_status,
         marketcap: s.market_cap ? (s.market_cap / 1e9) : 0, // Convert to Billions for display in frontend
-        sector: s.sector,
         color: s.color || "#0ea5e9",
-        trend: [s.price * 0.95, s.price * 0.97, s.price * 0.96, s.price * (1 + (s.change_pct/100))] // Dynamic sparkline from price and change
+        sector: s.sector,
+        trend: [s.price * 0.95, s.price * 0.97, s.price * 0.96, s.price * (1 + (s.change_pct/100))]
       }));
       applyAll();
     } else {
-      window.HalalStocks.showToast("Failed to load stock data", "error");
+      showScreenerError();
     }
   } catch (err) {
     console.error("Error loading screener data:", err);
-    window.HalalStocks.showToast("Backend connection error. Is the server running?", "error");
+    showScreenerError();
   }
 }
 
-initScreener();
+initScreener();
