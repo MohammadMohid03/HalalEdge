@@ -120,6 +120,90 @@ window.goPage = function(p) {
   window.scrollTo({ top: 200, behavior: 'smooth' });
 };
 
+// ── Search & Filter ───────────────────────────────────────────
+function applyAll() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const sector = document.getElementById('sectorFilter')?.value || '';
+  const minScore = parseInt(document.getElementById('scoreRange')?.value || '0');
+
+  filteredStocks = allStocks.filter(s => {
+    const matchQ = !q || s.symbol.toLowerCase().includes(q) || s.name.toLowerCase().includes(q);
+    const matchSector = !sector || s.sector === sector;
+    const matchScore = s.aiScore >= minScore;
+    const matchCompliance = complianceFilter === 'all' || (s.shariah || '').toLowerCase() === complianceFilter;
+    return matchQ && matchSector && matchScore && matchCompliance;
+  });
+
+  if (sortCol) {
+    filteredStocks.sort((a, b) => {
+      const av = a[sortCol], bv = b[sortCol];
+      return typeof av === 'string' ? av.localeCompare(bv) * sortDir : (av - bv) * sortDir;
+    });
+  }
+
+  currentPage = 1;
+  currentView === 'table' ? renderTable() : renderGrid();
+  enrichVisibleStocks();
+}
+
+document.getElementById('searchInput')?.addEventListener('input', applyAll);
+document.getElementById('sectorFilter')?.addEventListener('change', applyAll);
+document.getElementById('scoreRange')?.addEventListener('input', applyAll);
+
+window.setCompliance = function(val, el) {
+  complianceFilter = val;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  applyAll();
+};
+
+window.applyFilters = applyAll;
+window.resetFilters = function() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sectorFilter').value = '';
+  document.getElementById('scoreRange').value = 60;
+  document.getElementById('scoreVal').textContent = '60%';
+  complianceFilter = 'all';
+  document.querySelectorAll('.filter-btn')[0].classList.add('active');
+  document.querySelectorAll('.filter-btn').forEach((b, i) => { if (i !== 0) b.classList.remove('active'); });
+  applyAll();
+};
+
+// ── Sort ──────────────────────────────────────────────────────
+window.sortTable = function(col) {
+  if (sortCol === col) sortDir *= -1;
+  else { sortCol = col; sortDir = -1; }
+  document.querySelectorAll('.stocks-table th').forEach(th => th.classList.remove('sorted'));
+  applyAll();
+};
+
+window.setSortTab = function(el, mode) {
+  document.querySelectorAll('.sort-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  const map = { score:'aiScore', gainers:'change', losers:'change', volume:'marketcap', marketcap:'marketcap' };
+  sortCol = map[mode];
+  sortDir = mode === 'losers' ? 1 : -1;
+  applyAll();
+};
+
+// ── View Toggle ───────────────────────────────────────────────
+window.setView = function(view, el) {
+  currentView = view;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const tableWrap = document.getElementById('tableView');
+  const gridWrap  = document.getElementById('gridView');
+  if (view === 'table') {
+    tableWrap.classList.remove('hidden');
+    gridWrap.classList.add('hidden');
+    renderTable();
+  } else {
+    tableWrap.classList.add('hidden');
+    gridWrap.classList.remove('hidden');
+    renderGrid();
+  }
+};
+
 // ── Phase 2: Progressive live data loading in batches of 50 ──
 let progressiveRequestId = 0;
 let enrichRequestId = 0;
