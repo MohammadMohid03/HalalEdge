@@ -125,6 +125,67 @@ let progressiveRequestId = 0;
 let enrichRequestId = 0;
 const BATCH_SIZE = 50;
 
+// ── Loading & Error states ─────────────────────────────────────
+function showScreenerLoading() {
+  const tbody = document.getElementById('stockTableBody');
+  const grid = document.getElementById('gridView');
+  const loaderHtml = `
+    <tr>
+      <td colspan="9" style="text-align:center; padding:3rem 1rem">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem">
+          <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
+          <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
+        </div>
+      </td>
+    </tr>
+  `;
+  if (tbody) tbody.innerHTML = loaderHtml;
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 1rem; gap:1rem">
+        <div class="ai-spinner" style="width:36px; height:36px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
+        <div style="font-size:0.875rem; color:var(--text-muted)">Loading stocks database...</div>
+      </div>
+    `;
+  }
+}
+
+function showScreenerError() {
+  const tbody = document.getElementById('stockTableBody');
+  const grid = document.getElementById('gridView');
+  const errorHtml = `
+    <tr>
+      <td colspan="9" style="text-align:center; padding:3rem 1rem">
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem">
+          <div style="width:40px; height:40px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:1.25rem">⚠</div>
+          <div>
+            <div style="font-weight:700; color:var(--white); font-size:0.9rem">Connection Failed</div>
+            <div style="font-size:0.75rem; color:var(--text-muted)">Could not connect to the backend server.</div>
+          </div>
+          <button class="btn-outline" onclick="initScreener()" style="font-size:0.75rem; padding:0.5rem 1rem">
+            <i class="fa fa-sync-alt"></i> Retry Connection
+          </button>
+        </div>
+      </td>
+    </tr>
+  `;
+  if (tbody) tbody.innerHTML = errorHtml;
+  if (grid) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4rem 1rem; gap:1rem; border:1px solid var(--border); border-radius:var(--radius); background:var(--card)">
+        <div style="width:40px; height:40px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; align-items:center; justify-content:center; color:var(--red); font-size:1.25rem">⚠</div>
+        <div style="text-align:center">
+          <div style="font-weight:700; color:var(--white); font-size:0.9rem">Connection Failed</div>
+          <div style="font-size:0.75rem; color:var(--text-muted)">Could not connect to the backend server.</div>
+        </div>
+        <button class="btn-outline" onclick="initScreener()" style="font-size:0.75rem; padding:0.5rem 1rem">
+          <i class="fa fa-sync-alt"></i> Retry Connection
+        </button>
+      </div>
+    `;
+  }
+}
+
 async function fetchBatchData(symbols) {
   if (symbols.length === 0) return [];
   const symStr = symbols.join(',');
