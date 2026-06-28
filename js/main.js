@@ -171,7 +171,9 @@ function updateAuthNavbar() {
 
 // ── Export utilities ──────────────────────────────────────────
 window.HalalStocks = {
-  API_BASE: 'http://localhost:8000/api',
+  API_BASE: (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:8000/api'
+      : 'https://halaledge-api.onrender.com/api',
   showToast,
   animateCounter,
   formatPrice: (n) => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),

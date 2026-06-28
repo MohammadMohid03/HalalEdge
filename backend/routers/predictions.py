@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from backend.database import get_db
 from backend.models.prediction import Prediction
 from backend.models.shariah import ShariahCache
-from backend.schemas.predictions import PredictionOut, ShariahOut
+from backend.schemas.predictions import PredictionOut, ShariahOut, PredictionDetailOut
 from backend.services.stock_data import get_stock_info
 from backend.services.shariah import check_shariah as run_shariah_check
+from backend.services.ensemble import get_ensemble_prediction
 
 router = APIRouter(prefix="/predictions", tags=["predictions"])
 
@@ -25,37 +26,59 @@ def get_prediction(symbol: str, db: Session = Depends(get_db)):
     if cached:
         return cached
 
-    # Fetch live info (contains AI and shariah metrics)
-    info = get_stock_info(symbol_upper)
-    if not info:
+    # Run the real ensemble prediction pipeline
+    try:
+        ensemble_result = get_ensemble_prediction(symbol_upper)
+    except Exception as e:
+        print(f"[predictions] Ensemble prediction failed for {symbol_upper}: {e}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Predictions not available for symbol {symbol_upper}."
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"AI prediction service temporarily unavailable for {symbol_upper}."
         )
-
-    # Simple mock breakdown of ensemble components matching the metadata/roadmap
-    import random
-    random.seed(symbol_upper) # Deterministic scores per stock
-    lstm_score = info["ai_score"] - random.randint(-5, 5)
-    sentiment = info["ai_score"] + random.randint(-5, 5)
-    shariah_score = info["shariah_score"]
-    ensemble = info["ai_score"]
-    confidence = random.randint(75, 95)
 
     # Save to database cache
     new_pred = Prediction(
         symbol=symbol_upper,
-        verdict=info["verdict"],
-        confidence=confidence,
-        lstm_score=lstm_score,
-        sentiment=sentiment,
-        shariah_score=shariah_score,
-        ensemble=ensemble
+        verdict=ensemble_result["verdict"],
+        confidence=ensemble_result["confidence"],
+        lstm_score=ensemble_result["lstm_score"],
+        sentiment=ensemble_result["sentiment_score"],
+        shariah_score=ensemble_result["shariah_score"],
+        ensemble=ensemble_result["ensemble_score"]
     )
     db.add(new_pred)
     db.commit()
     db.refresh(new_pred)
     return new_pred
+
+
+@router.get("/{symbol}/details", response_model=PredictionDetailOut)
+def get_prediction_details(symbol: str):
+    """Return full breakdown of the ensemble prediction with all component details."""
+    symbol_upper = symbol.upper().strip()
+
+    try:
+        ensemble_result = get_ensemble_prediction(symbol_upper)
+    except Exception as e:
+        print(f"[predictions] Detail prediction failed for {symbol_upper}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"AI prediction service temporarily unavailable for {symbol_upper}."
+        )
+
+    return PredictionDetailOut(
+        symbol=symbol_upper,
+        verdict=ensemble_result["verdict"],
+        confidence=ensemble_result["confidence"],
+        lstm_score=ensemble_result["lstm_score"],
+        sentiment_score=ensemble_result["sentiment_score"],
+        shariah_score=ensemble_result["shariah_score"],
+        ensemble_score=ensemble_result["ensemble_score"],
+        technical_indicators=ensemble_result.get("technical_indicators", {}),
+        lstm_details=ensemble_result.get("lstm_details", {}),
+        sentiment_details=ensemble_result.get("sentiment_details", {}),
+    )
+
 
 @router.get("/{symbol}/shariah", response_model=ShariahOut)
 def get_shariah_detail(symbol: str, db: Session = Depends(get_db)):

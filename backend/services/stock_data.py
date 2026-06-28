@@ -271,3 +271,95 @@ def get_top_picks() -> List[dict]:
     halal_stocks = [s for s in all_stocks if s["shariah_status"] == "Halal"]
     halal_stocks.sort(key=lambda x: x["ai_score"], reverse=True)
     return halal_stocks[:6]
+
+
+def get_technical_indicators(symbol: str) -> dict:
+    """Calculate technical indicators for a given stock symbol.
+
+    Returns:
+        dict with keys:
+            rsi (float): 14-day Relative Strength Index (0-100)
+            momentum_52w (float): 52-week price momentum as percentage (0-100)
+            volume_trend (float): 5-day avg volume / 20-day avg volume ratio
+            beta (float): stock beta from yfinance info
+            sma20 (float): 20-day Simple Moving Average
+            sma50 (float): 50-day Simple Moving Average
+            current_price (float): latest close price
+            pe_ratio (float): trailing P/E ratio
+    """
+    symbol_upper = symbol.upper().strip()
+
+    # Default values
+    indicators = {
+        "rsi": 50.0,
+        "momentum_52w": 50.0,
+        "volume_trend": 1.0,
+        "beta": 1.0,
+        "sma20": 0.0,
+        "sma50": 0.0,
+        "current_price": 0.0,
+        "pe_ratio": 0.0,
+    }
+
+    try:
+        ticker = yf.Ticker(symbol_upper)
+
+        # Fetch 1 year of daily data for calculations
+        hist = ticker.history(period="1y", interval="1d")
+
+        if hist is None or hist.empty or len(hist) < 20:
+            return indicators
+
+        closes = hist["Close"].values
+        volumes = hist["Volume"].values
+        current_price = float(closes[-1])
+        indicators["current_price"] = round(current_price, 2)
+
+        # --- RSI (14-day) ---
+        if len(closes) >= 15:
+            deltas = pd.Series(closes).diff()
+            gains = deltas.where(deltas > 0, 0.0)
+            losses = (-deltas).where(deltas < 0, 0.0)
+            avg_gain = gains.rolling(window=14, min_periods=14).mean().iloc[-1]
+            avg_loss = losses.rolling(window=14, min_periods=14).mean().iloc[-1]
+            if avg_loss != 0:
+                rs = avg_gain / avg_loss
+                rsi = 100 - (100 / (1 + rs))
+            else:
+                rsi = 100.0  # No losses → fully overbought
+            indicators["rsi"] = round(float(rsi), 2)
+
+        # --- 52-week momentum ---
+        high_52w = float(closes.max())
+        low_52w = float(closes.min())
+        if high_52w != low_52w:
+            momentum = (current_price - low_52w) / (high_52w - low_52w) * 100
+        else:
+            momentum = 50.0
+        indicators["momentum_52w"] = round(momentum, 2)
+
+        # --- Volume trend (5-day avg / 20-day avg) ---
+        if len(volumes) >= 20:
+            avg_vol_5 = float(volumes[-5:].mean())
+            avg_vol_20 = float(volumes[-20:].mean())
+            if avg_vol_20 > 0:
+                indicators["volume_trend"] = round(avg_vol_5 / avg_vol_20, 2)
+
+        # --- SMA20 and SMA50 ---
+        if len(closes) >= 20:
+            indicators["sma20"] = round(float(closes[-20:].mean()), 2)
+        if len(closes) >= 50:
+            indicators["sma50"] = round(float(closes[-50:].mean()), 2)
+
+        # --- Beta and PE ratio from yfinance info ---
+        try:
+            info = ticker.info
+            indicators["beta"] = round(float(info.get("beta", 1.0) or 1.0), 2)
+            indicators["pe_ratio"] = round(float(info.get("trailingPE", 0.0) or 0.0), 2)
+        except Exception:
+            pass  # Keep defaults
+
+    except Exception as e:
+        print(f"Error calculating technical indicators for {symbol_upper}: {e}")
+
+    return indicators

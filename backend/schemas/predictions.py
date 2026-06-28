@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 class PredictionOut(BaseModel):
@@ -11,6 +11,22 @@ class PredictionOut(BaseModel):
     shariah_score: int
     ensemble: int
     created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PredictionDetailOut(BaseModel):
+    """Full breakdown of ensemble prediction with all component details."""
+    symbol: str
+    verdict: str
+    confidence: int
+    lstm_score: int
+    sentiment_score: int
+    shariah_score: int
+    ensemble_score: int
+    technical_indicators: Dict[str, Any] = {}
+    lstm_details: Dict[str, Any] = {}
+    sentiment_details: Dict[str, Any] = {}
 
     class Config:
         from_attributes = True

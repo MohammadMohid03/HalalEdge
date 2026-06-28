@@ -12,3 +12,11 @@ python-multipart
 python-dotenv
 requests
 cryptography
+scikit-learn
+xgboost
+transformers
+torch
+feedparser
+beautifulsoup4
+numpy
+joblib

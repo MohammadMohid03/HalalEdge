@@ -27,3 +27,15 @@ env/
 error.txt
 .vscode/
 .idea/
+
+# ML model artifacts
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.bin
+models_cache/
+
+# Transformers cache
+.cache/
+huggingface/

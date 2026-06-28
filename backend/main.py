@@ -28,7 +28,11 @@ app = FastAPI(
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Supports wildcard for easy local frontend testing
+    allow_origins=[
+        "*",
+        "https://halaledge.vercel.app",
+        "https://halaledge-api.onrender.com",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
