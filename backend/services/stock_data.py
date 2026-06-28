@@ -1,12 +1,23 @@
 import yfinance as yf
 from datetime import datetime, timedelta
 import pandas as pd
+import time
+import re
+import hashlib
+import requests
+from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 from typing import List, Dict, Optional
 from backend.services.shariah import check_shariah
 
 # In-memory cache for stock information to prevent excessive yfinance API calls and speed up loads
 _stock_info_cache = {}
 _stock_history_cache = {}
+# Caches for the dynamic screener universe (S&P 500 constituents + batch prices)
+_sp500_cache = None  # (fetch_time, list[dict]) — refreshed daily
+_sp500_cache_ttl = 24 * 3600
+_screener_universe_cache = None  # (fetch_time, list[dict]) — refreshed every 5 min
+_screener_universe_cache_ttl = 300
 
 # Mock details from frontend design system
 STOCK_METADATA = {
@@ -248,11 +259,225 @@ def search_stocks(query: str) -> List[dict]:
 
     return results
 
+# ── Dynamic screener universe (S&P 500 via Wikipedia + batch yfinance) ────────
+_GICS_SECTOR_MAP = {
+    "Information Technology": "Technology",
+    "Health Care": "Healthcare",
+    "Consumer Discretionary": "Consumer",
+    "Consumer Staples": "Consumer",
+    "Industrials": "Industrials",
+    "Energy": "Energy",
+    "Financials": "Financials",
+    "Materials": "Materials",
+    "Real Estate": "Real Estate",
+    "Communication Services": "Communication",
+    "Utilities": "Utilities",
+}
+
+# Base shariah scores per GICS sector (used for stocks without mock compliance data)
+_SECTOR_BASE_SHARIAH = {
+    "Information Technology": 75,
+    "Health Care": 70,
+    "Consumer Discretionary": 70,
+    "Consumer Staples": 78,
+    "Industrials": 72,
+    "Energy": 68,
+    "Materials": 70,
+    "Communication Services": 65,
+    "Utilities": 72,
+    "Real Estate": 58,
+    "Financials": 50,
+}
+
+
+def _color_from_symbol(symbol: str) -> str:
+    h = hashlib.md5(symbol.encode()).hexdigest()
+    return f"#{h[0:2]}{h[2:4]}{h[4:6]}"
+
+
+def _get_sp500_constituents() -> List[dict]:
+    """Fetch the current S&P 500 constituent list from Wikipedia (cached 24h)."""
+    global _sp500_cache
+    if _sp500_cache and (time.time() - _sp500_cache[0]) < _sp500_cache_ttl:
+        return _sp500_cache[1]
+    try:
+        url = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+        resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (compatible; HalalEdgeScreener/1.0)"}, timeout=15)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        table = None
+        for tbl in soup.find_all("table"):
+            header_row = tbl.find("tr")
+            if not header_row:
+                continue
+            header_texts = [c.get_text(strip=True).lower() for c in header_row.find_all(["th", "td"])]
+            if "symbol" in header_texts:
+                table = tbl
+                break
+        if not table:
+            return []
+        rows = table.find_all("tr")
+        if len(rows) < 2:
+            return []
+        headers = [c.get_text(strip=True).lower() for c in rows[0].find_all(["th", "td"])]
+        sym_idx = headers.index("symbol") if "symbol" in headers else 0
+        name_idx = headers.index("security") if "security" in headers else sym_idx
+        sector_idx = next((i for i, h in enumerate(headers) if "sector" in h), None)
+        sub_idx = next((i for i, h in enumerate(headers) if "sub" in h and "industry" in h), None)
+
+        constituents = []
+        for row in rows[1:]:
+            cells = row.find_all(["td", "th"])
+            needed = [i for i in [sym_idx, name_idx, sector_idx, sub_idx] if i is not None]
+            if not needed or len(cells) <= max(needed):
+                continue
+            raw_sym = cells[sym_idx].get_text(strip=True).upper()
+            sym = re.sub(r"[^A-Z0-9.\-]", "", raw_sym).replace(".", "-")
+            if not sym:
+                continue
+            name = cells[name_idx].get_text(strip=True) if name_idx is not None else sym
+            sector = cells[sector_idx].get_text(strip=True) if sector_idx is not None else ""
+            industry = cells[sub_idx].get_text(strip=True) if sub_idx is not None else ""
+            constituents.append({
+                "symbol": sym,
+                "name": name,
+                "gics_sector": sector,
+                "industry": industry,
+            })
+        _sp500_cache = (time.time(), constituents)
+        return constituents
+    except Exception as e:
+        print(f"Error fetching S&P 500 constituents: {e}")
+        return []
+
+
+def _parse_hist_block(block) -> Optional[dict]:
+    """Extract latest price/change/volume from a yfinance history DataFrame block."""
+    try:
+        block = block.dropna(subset=["Close"])
+        if block.empty:
+            return None
+        closes = block["Close"].values
+        vols = block["Volume"].values
+        price = float(closes[-1])
+        prev = float(closes[-2]) if len(closes) >= 2 else price
+        change = price - prev
+        change_pct = (change / prev) * 100.0 if prev else 0.0
+        vol = float(vols[-1]) if len(vols) and not pd.isna(vols[-1]) else 0.0
+        return {
+            "price": round(price, 2),
+            "change": round(change, 2),
+            "change_pct": round(change_pct, 2),
+            "volume": vol,
+        }
+    except Exception:
+        return None
+
+
+def _get_batch_prices(symbols: List[str]) -> dict:
+    """Batch-fetch recent prices for many tickers via yf.download (chunked)."""
+    if not symbols:
+        return {}
+    result = {}
+    chunk_size = 100
+    for i in range(0, len(symbols), chunk_size):
+        chunk = symbols[i:i + chunk_size]
+        try:
+            data = yf.download(chunk, period="5d", interval="1d", group_by="ticker", progress=False, threads=True)
+            if data is None or getattr(data, "empty", True):
+                continue
+            if len(chunk) == 1:
+                sym = chunk[0]
+                block = data[sym] if isinstance(data.columns, pd.MultiIndex) else data
+                parsed = _parse_hist_block(block)
+                if parsed:
+                    result[sym] = parsed
+            else:
+                for sym in chunk:
+                    try:
+                        parsed = _parse_hist_block(data[sym])
+                        if parsed:
+                            result[sym] = parsed
+                    except Exception:
+                        continue
+        except Exception as e:
+            print(f"Error downloading price chunk {i}-{i + len(chunk)}: {e}")
+            continue
+    return result
+
+
+def _shariah_heuristic(gics_sector: str, industry: str) -> dict:
+    """Lightweight shariah estimate from GICS sector/sub-industry (no yfinance call)."""
+    sector_lower = gics_sector.lower()
+    industry_lower = industry.lower()
+    if any(k in industry_lower for k in ["alcohol", "wineries", "distiller", "tobacco", "gambling", "casino", "brewing"]):
+        return {"status": "Haram", "score": 30}
+    if "defense" in industry_lower:
+        return {"status": "Doubtful", "score": 52}
+    score = _SECTOR_BASE_SHARIAH.get(gics_sector, 70)
+    status = "Doubtful" if ("financial" in sector_lower or "real estate" in sector_lower) else "Halal"
+    return {"status": status, "score": score}
+
+
+def _ai_score_from_momentum(change_pct: float, base: int = 68) -> tuple:
+    """Derive a dynamic AI score/verdict from recent price momentum."""
+    score = int(max(35, min(95, base + change_pct * 3)))
+    verdict = "BUY" if score >= 75 else "AVOID" if score < 50 else "HOLD"
+    return score, verdict
+
+
+def _get_extended_screener_stocks() -> List[dict]:
+    """Build screener data for S&P 500 stocks beyond STOCK_METADATA (dynamic, cached 5 min)."""
+    global _screener_universe_cache
+    if _screener_universe_cache and (time.time() - _screener_universe_cache[0]) < _screener_universe_cache_ttl:
+        return _screener_universe_cache[1]
+
+    constituents = _get_sp500_constituents()
+    extended = [c for c in constituents if c["symbol"] not in STOCK_METADATA]
+    if not extended:
+        return []
+
+    batch_prices = _get_batch_prices([c["symbol"] for c in extended])
+
+    results = []
+    for c in extended:
+        sym = c["symbol"]
+        px = batch_prices.get(sym)
+        if not px:
+            continue
+        mapped_sector = _GICS_SECTOR_MAP.get(c["gics_sector"], c["gics_sector"] or "Unknown")
+        sh = _shariah_heuristic(c["gics_sector"], c["industry"])
+        ai_score, verdict = _ai_score_from_momentum(px["change_pct"])
+        results.append({
+            "symbol": sym,
+            "name": c["name"],
+            "price": px["price"],
+            "change": px["change"],
+            "change_pct": px["change_pct"],
+            "market_cap": None,
+            "pe_ratio": None,
+            "volume": px["volume"],
+            "fifty_two_week_high": None,
+            "fifty_two_week_low": None,
+            "sector": mapped_sector,
+            "industry": c["industry"] or mapped_sector,
+            "shariah_status": sh["status"],
+            "shariah_score": sh["score"],
+            "ai_score": ai_score,
+            "verdict": verdict,
+            "color": _color_from_symbol(sym),
+        })
+
+    _screener_universe_cache = (time.time(), results)
+    return results
+
+
 def get_screener_stocks(filters: dict) -> List[dict]:
-    # Screener works primarily on our 24 mock stocks, plus dynamic query capabilities
-    all_screened = []
-    for sym in STOCK_METADATA.keys():
-        all_screened.append(get_stock_info(sym))
+    # Featured stocks from STOCK_METADATA (rich data, fetched in parallel, cached per-stock)
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        all_screened = list(ex.map(get_stock_info, list(STOCK_METADATA.keys())))
+    # Extended universe: S&P 500 constituents fetched dynamically via yfinance
+    all_screened.extend(_get_extended_screener_stocks())
 
     # Apply filters
     filtered = []
