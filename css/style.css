@@ -719,12 +719,44 @@ footer {
 .input-wrapper .input-toggle:hover { color: var(--primary); }
 
 /* ==================== LOADING SKELETON ==================== */
-.skeleton {
+.skeleton,
+.skeleton-text,
+.skeleton-avatar,
+.skeleton-pill,
+.skeleton-badge,
+.skeleton-tag,
+.skeleton-chart,
+.skeleton-title,
+.skeleton-value,
+.skeleton-bar,
+.skeleton-row {
   background: linear-gradient(90deg, var(--card) 25%, var(--card-2) 50%, var(--card) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--radius-sm);
 }
+
+.skeleton-text  { height: 0.75rem; }
+.skeleton-title { height: 1rem; }
+.skeleton-value { height: 1.5rem; }
+.skeleton-avatar { width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; }
+.skeleton-pill  { width: 44px; height: 22px; border-radius: 20px; }
+.skeleton-badge { width: 52px; height: 20px; border-radius: 6px; }
+.skeleton-tag   { width: 64px; height: 20px; border-radius: 20px; }
+.skeleton-chart { width: 100%; height: 100%; border-radius: var(--radius); min-height: 120px; }
+.skeleton-bar   { height: 8px; border-radius: 4px; }
+
+.skeleton-row td { border-bottom: 1px solid var(--border); }
+.skeleton-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.skeleton-hidden { display: none !important; }
 
 /* ==================== TOAST ==================== */
 .toast-container {

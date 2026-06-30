@@ -5,8 +5,67 @@ if (!localStorage.getItem('token')) {
 
 let portfolio = []; // Will store holdings list returned from API
 let pieChart = null;
+let portfolioInitialLoad = true;
+
+function skeletonPortfolioRow() {
+  return `
+    <tr style="pointer-events:none">
+      <td><div class="td-stock">${window.HalalStocks.skeleton.avatar()}<div style="display:flex;flex-direction:column;gap:6px">${window.HalalStocks.skeleton.text('50px')}${window.HalalStocks.skeleton.text('90px')}</div></div></td>
+      <td>${window.HalalStocks.skeleton.text('40px')}</td>
+      <td>${window.HalalStocks.skeleton.text('55px')}</td>
+      <td>${window.HalalStocks.skeleton.text('55px')}</td>
+      <td>${window.HalalStocks.skeleton.text('60px')}</td>
+      <td>${window.HalalStocks.skeleton.text('55px')}</td>
+      <td>${window.HalalStocks.skeleton.pill()}</td>
+      <td>${window.HalalStocks.skeleton.badge()}</td>
+    </tr>`;
+}
+
+function skeletonWatchlistRow() {
+  return `
+    <tr style="pointer-events:none">
+      <td><div class="td-stock">${window.HalalStocks.skeleton.avatar()}<div style="display:flex;flex-direction:column;gap:6px">${window.HalalStocks.skeleton.text('50px')}${window.HalalStocks.skeleton.text('90px')}</div></div></td>
+      <td>${window.HalalStocks.skeleton.text('55px')}</td>
+      <td>${window.HalalStocks.skeleton.text('55px')}</td>
+      <td>${window.HalalStocks.skeleton.badge()}</td>
+      <td>${window.HalalStocks.skeleton.badge()}</td>
+      <td>${window.HalalStocks.skeleton.pill()}</td>
+      <td>${window.HalalStocks.skeleton.badge()}</td>
+    </tr>`;
+}
+
+function setSkeleton(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+function showPortfolioSkeleton() {
+  setSkeleton('totalValue', window.HalalStocks.skeleton.value('100px'));
+  setSkeleton('totalGainAbs', window.HalalStocks.skeleton.text('90px'));
+  setSkeleton('todayGain', window.HalalStocks.skeleton.value('90px'));
+  setSkeleton('holdingsCount', window.HalalStocks.skeleton.value('30px'));
+
+  const holdingsBody = document.getElementById('holdingsBody');
+  if (holdingsBody) holdingsBody.innerHTML = Array.from({ length: 5 }, skeletonPortfolioRow).join('');
+
+  const watchlistBody = document.getElementById('watchlistBody');
+  if (watchlistBody) watchlistBody.innerHTML = Array.from({ length: 4 }, skeletonWatchlistRow).join('');
+
+  const pieWrap = document.querySelector('.pie-canvas-wrap');
+  if (pieWrap) pieWrap.innerHTML = window.HalalStocks.skeleton.chart('200px');
+
+  const pieLegend = document.getElementById('pieLegend');
+  if (pieLegend) pieLegend.innerHTML = Array.from({ length: 4 }, () => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">${window.HalalStocks.skeleton.badge()}${window.HalalStocks.skeleton.text('80px')}</div>`).join('');
+
+  setSkeleton('zakatableVal', window.HalalStocks.skeleton.value('70px'));
+  setSkeleton('zakatDue', window.HalalStocks.skeleton.value('70px'));
+}
 
 async function loadPortfolio() {
+  if (portfolioInitialLoad) {
+    showPortfolioSkeleton();
+    portfolioInitialLoad = false;
+  }
   try {
     const res = await fetch(`${window.HalalStocks.API_BASE}/portfolio/summary`, {
       headers: window.HalalStocks.getAuthHeaders()
@@ -107,8 +166,15 @@ function renderPortfolioTable() {
 }
 
 function renderPieChart() {
-  const canvas = document.getElementById('pieChart');
+  let canvas = document.getElementById('pieChart');
   const legend = document.getElementById('pieLegend');
+  if (!canvas) {
+    const pieWrap = document.querySelector('.pie-canvas-wrap');
+    if (pieWrap) {
+      pieWrap.innerHTML = '<canvas id="pieChart" width="200" height="200"></canvas>';
+      canvas = document.getElementById('pieChart');
+    }
+  }
   if (!canvas) return;
 
   if (portfolio.length === 0) {

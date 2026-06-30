@@ -189,6 +189,17 @@ window.HalalStocks = {
     if (billions >= 1000) return '$' + (billions / 1000).toFixed(2) + 'T';
     return '$' + Number(billions).toFixed(2) + 'B';
   },
+  skeleton: {
+    text: (w) => `<div class="skeleton-text" style="width:${w}"></div>`,
+    title: (w) => `<div class="skeleton-title" style="width:${w}"></div>`,
+    value: (w) => `<div class="skeleton-value" style="width:${w}"></div>`,
+    avatar: () => `<div class="skeleton-avatar"></div>`,
+    pill: () => `<div class="skeleton-pill"></div>`,
+    badge: () => `<div class="skeleton-badge"></div>`,
+    tag: () => `<div class="skeleton-tag"></div>`,
+    bar: (w) => `<div class="skeleton-bar" style="width:${w}"></div>`,
+    chart: (h = '120px') => `<div class="skeleton-chart" style="min-height:${h}"></div>`
+  },
   getAuthHeaders: () => {
     const token = localStorage.getItem('token');
     return token ? { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };

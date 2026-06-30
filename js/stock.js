@@ -23,14 +23,126 @@ function showPredictionLoading() {
   const body = document.querySelector('.ai-pred-card .ai-pred-body');
   if (body) {
     body.innerHTML = `
-      <div class="ai-loading-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:3rem 1rem; text-align:center; gap:1.25rem">
-        <div class="ai-spinner" style="width:40px; height:40px; border:3px solid rgba(14, 165, 233, 0.15); border-top-color:var(--primary); border-radius:50%; animation:spin 1s linear infinite"></div>
-        <div>
-          <div style="font-weight:700; color:var(--white); font-size:0.95rem; margin-bottom:0.4rem">Running AI Prediction Pipeline</div>
-          <div style="font-size:0.78rem; color:var(--text-muted); line-height:1.55; max-width:260px; margin:0 auto">Training LSTM price models and analyzing live news headlines with FinBERT NLP.<br><span style="color:var(--gold); font-weight:600; display:block; margin-top:0.5rem">First run may take 3-5 minutes while models download...</span></div>
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div style="display:flex;align-items:center;gap:1rem">
+          ${window.HalalStocks.skeleton.avatar()}
+          <div style="display:flex;flex-direction:column;gap:6px;flex:1">
+            ${window.HalalStocks.skeleton.title('80px')}
+            ${window.HalalStocks.skeleton.text('140px')}
+          </div>
+        </div>
+        ${window.HalalStocks.skeleton.bar('100%')}
+        ${window.HalalStocks.skeleton.bar('90%')}
+        ${window.HalalStocks.skeleton.bar('95%')}
+        ${window.HalalStocks.skeleton.bar('85%')}
+        <div style="display:flex;gap:1rem;margin-top:0.5rem">
+          <div style="flex:1;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;display:flex;flex-direction:column;gap:6px">
+            ${window.HalalStocks.skeleton.text('40px')}
+            ${window.HalalStocks.skeleton.value('70px')}
+          </div>
+          <div style="flex:1;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.75rem;display:flex;flex-direction:column;gap:6px">
+            ${window.HalalStocks.skeleton.text('40px')}
+            ${window.HalalStocks.skeleton.value('70px')}
+          </div>
         </div>
       </div>
     `;
+  }
+}
+
+function showStockSkeleton() {
+  // Header
+  const logoEl = document.querySelector('.stock-logo-big');
+  if (logoEl) {
+    logoEl.textContent = '';
+    logoEl.style.background = 'var(--card)';
+    logoEl.classList.add('skeleton-avatar');
+    logoEl.style.width = '64px';
+    logoEl.style.height = '64px';
+    logoEl.style.borderRadius = '16px';
+  }
+  const tickerEl = document.querySelector('.stock-ticker');
+  if (tickerEl) {
+    tickerEl.innerHTML = window.HalalStocks.skeleton.title('80px');
+  }
+  const fullEl = document.querySelector('.stock-fullname');
+  if (fullEl) {
+    fullEl.innerHTML = window.HalalStocks.skeleton.text('140px');
+  }
+  const tagsEl = document.querySelector('.stock-tags');
+  if (tagsEl) {
+    tagsEl.innerHTML = `${window.HalalStocks.skeleton.badge()}${window.HalalStocks.skeleton.tag()}${window.HalalStocks.skeleton.tag()}`;
+  }
+  const priceEl = document.getElementById('stockPriceBig');
+  if (priceEl) {
+    priceEl.innerHTML = window.HalalStocks.skeleton.value('120px');
+  }
+  const changeEl = document.getElementById('stockChangeBig');
+  if (changeEl) {
+    changeEl.innerHTML = window.HalalStocks.skeleton.text('100px');
+    changeEl.className = 'stock-change-big';
+  }
+
+  // Stats grid
+  const statsEl = document.querySelector('.stats-grid-card');
+  if (statsEl) {
+    statsEl.innerHTML = Array.from({ length: 8 }, () => `
+      <div class="stat-cell">
+        <div class="stat-cell-label">${window.HalalStocks.skeleton.text('35px')}</div>
+        <div class="stat-cell-value">${window.HalalStocks.skeleton.value('60px')}</div>
+      </div>
+    `).join('');
+  }
+
+  // Chart
+  const chartBody = document.querySelector('.chart-card .chart-body');
+  if (chartBody) {
+    chartBody.innerHTML = window.HalalStocks.skeleton.chart('220px');
+  }
+
+  // Info tabs
+  const infoContent = document.getElementById('infoTabContent');
+  if (infoContent) {
+    infoContent.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:0.75rem">
+        ${window.HalalStocks.skeleton.text('100%')}
+        ${window.HalalStocks.skeleton.text('95%')}
+        ${window.HalalStocks.skeleton.text('80%')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.25rem">
+        ${Array.from({ length: 3 }, () => `
+          <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.875rem;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center">
+            ${window.HalalStocks.skeleton.text('50px')}
+            ${window.HalalStocks.skeleton.value('70px')}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // News
+  const newsContainer = document.getElementById('newsItems');
+  if (newsContainer) {
+    newsContainer.innerHTML = Array.from({ length: 4 }, () => `
+      <div class="news-item" style="pointer-events:none">
+        ${window.HalalStocks.skeleton.title('70%')}
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem">${window.HalalStocks.skeleton.text('80px')}${window.HalalStocks.skeleton.text('40px')}</div>
+      </div>
+    `).join('');
+  }
+
+  // AI prediction
+  showPredictionLoading();
+
+  // Shariah card
+  const shariahBody = document.querySelector('.shariah-card-body');
+  if (shariahBody) {
+    shariahBody.innerHTML = Array.from({ length: 6 }, () => `
+      <div class="shariah-row">
+        ${window.HalalStocks.skeleton.text('80px')}
+        ${window.HalalStocks.skeleton.text('50px')}
+      </div>
+    `).join('');
   }
 }
 
@@ -71,6 +183,7 @@ function showStockPageError() {
 }
 
 async function loadStockDetails() {
+  showStockSkeleton();
   try {
     // 1. Fetch details & stats
     const detailsRes = await fetch(`${window.HalalStocks.API_BASE}/stocks/${symbol}`, {
@@ -151,6 +264,10 @@ function updateHeaderUI() {
   // Avatar Logo
   const logoEl = document.querySelector('.stock-logo-big');
   if (logoEl) {
+    logoEl.classList.remove('skeleton-avatar');
+    logoEl.style.width = '';
+    logoEl.style.height = '';
+    logoEl.style.borderRadius = '';
     logoEl.textContent = symbol.slice(0, 3);
     logoEl.style.background = `linear-gradient(135deg, ${companyDetails.color}88, ${companyDetails.color})`;
   }
@@ -373,7 +490,17 @@ function updateNewsUI() {
 }
 
 // ── Chart.js API Connection ────────────────────────────────────
-const ctx = document.getElementById('mainChart')?.getContext('2d');
+function getChartCtx() {
+  let canvas = document.getElementById('mainChart');
+  if (!canvas) {
+    const chartBody = document.querySelector('.chart-card .chart-body');
+    if (chartBody) {
+      chartBody.innerHTML = '<canvas id="mainChart" height="220"></canvas>';
+      canvas = document.getElementById('mainChart');
+    }
+  }
+  return canvas?.getContext('2d');
+}
 
 async function drawChart(period = '1D') {
   try {
@@ -396,7 +523,9 @@ async function drawChart(period = '1D') {
     const color = isUp ? '#10b981' : '#ef4444';
 
     if (chart) chart.destroy();
-    
+    const ctx = getChartCtx();
+    if (!ctx) return;
+
     chart = new Chart(ctx, {
       type: 'line',
       data: {

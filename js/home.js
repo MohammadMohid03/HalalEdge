@@ -120,7 +120,38 @@ window.filterPicks = function(tab, el) {
   renderStockCards(tab);
 };
 
-renderStockCards('buy');
+function skeletonStockCard() {
+  return `
+    <div class="stock-card skeleton-card">
+      <div class="sc-header">
+        <div class="sc-identity">
+          ${window.HalalStocks.skeleton.avatar()}
+          <div style="display:flex;flex-direction:column;gap:6px">
+            ${window.HalalStocks.skeleton.text('50px')}
+            ${window.HalalStocks.skeleton.text('90px')}
+          </div>
+        </div>
+        ${window.HalalStocks.skeleton.badge()}
+      </div>
+      <div class="sc-chart" style="display:flex;align-items:center;justify-content:center">
+        ${window.HalalStocks.skeleton.text('80%')}
+      </div>
+      <div class="sc-price-row">
+        ${window.HalalStocks.skeleton.value('70px')}
+        ${window.HalalStocks.skeleton.text('55px')}
+      </div>
+      <div class="sc-footer">
+        ${window.HalalStocks.skeleton.badge()}
+        ${window.HalalStocks.skeleton.text('45px')}
+        ${window.HalalStocks.skeleton.tag()}
+      </div>
+    </div>`;
+}
+
+const stockGrid = document.getElementById('stockGrid');
+if (stockGrid) stockGrid.innerHTML = Array.from({ length: 6 }, skeletonStockCard).join('');
+
+setTimeout(() => renderStockCards('buy'), 350);
 
 // ── Animate score bars on scroll ─────────────────────────────
 const barObserver = new IntersectionObserver((entries) => {
