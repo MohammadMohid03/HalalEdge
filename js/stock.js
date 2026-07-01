@@ -185,7 +185,7 @@ function showStockPageError() {
 async function loadStockDetails() {
   showStockSkeleton();
   try {
-    // 1. Fetch details & stats
+    // 1. Fetch core stock details first (required before rendering header/stats)
     const detailsRes = await fetch(`${window.HalalStocks.API_BASE}/stocks/${symbol}`, {
       headers: window.HalalStocks.getAuthHeaders()
     });
@@ -197,56 +197,59 @@ async function loadStockDetails() {
     companyDetails = await detailsRes.json();
     currentPrice = companyDetails.price;
 
-    // Update Header and Stats immediately to keep page responsive
+    // Render header/stats/news immediately
     updateHeaderUI();
     updateStatsGridUI();
     updateTabsUI('about');
     updateNewsUI();
 
-    // Show loading state for AI prediction
-    showPredictionLoading();
-
-    // 2. Fetch AI Predictions (cached, generated offline by GitHub Actions)
-    try {
-      const predRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}`, {
-        headers: window.HalalStocks.getAuthHeaders()
-      });
-      if (predRes.ok) {
-        aiPrediction = await predRes.json();
-        updatePredictionUI();
-      } else if (predRes.status === 404) {
-        showPredictionError('AI prediction is scheduled. The daily pipeline will generate it soon.');
-      } else {
-        const errorData = await predRes.json().catch(() => ({}));
-        showPredictionError(errorData.detail || 'Failed to load prediction.');
-      }
-    } catch (e) {
-      console.error('Error fetching prediction:', e);
-      showPredictionError('Network timeout or connection lost.');
-    }
-
-    // 3. Fetch Shariah parameter details
-    try {
-      const shariahRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/shariah`, {
-        headers: window.HalalStocks.getAuthHeaders()
-      });
-      if (shariahRes.ok) {
-        shariahDetail = await shariahRes.json();
-        updateShariahUI();
-      }
-    } catch (e) {
-      console.error('Error fetching Shariah details:', e);
-    }
-
-    // 4. Fetch Prediction History
-    try {
-      const histRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/history`);
-      if (histRes.ok) {
-        predictionHistory = await histRes.json();
-      }
-    } catch (e) {
-      console.error('Error fetching prediction history:', e);
-    }
+    // 2. Fetch prediction, shariah, history, and chart in parallel
+    // (prediction is cached on the backend, so this is fast)
+    await Promise.all([
+      (async () => {
+        try {
+          const predRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}`, {
+            headers: window.HalalStocks.getAuthHeaders()
+          });
+          if (predRes.ok) {
+            aiPrediction = await predRes.json();
+            updatePredictionUI();
+          } else if (predRes.status === 404) {
+            showPredictionError('AI prediction is scheduled. The daily pipeline will generate it soon.');
+          } else {
+            const errorData = await predRes.json().catch(() => ({}));
+            showPredictionError(errorData.detail || 'Failed to load prediction.');
+          }
+        } catch (e) {
+          console.error('Error fetching prediction:', e);
+          showPredictionError('Network timeout or connection lost.');
+        }
+      })(),
+      (async () => {
+        try {
+          const shariahRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/shariah`, {
+            headers: window.HalalStocks.getAuthHeaders()
+          });
+          if (shariahRes.ok) {
+            shariahDetail = await shariahRes.json();
+            updateShariahUI();
+          }
+        } catch (e) {
+          console.error('Error fetching Shariah details:', e);
+        }
+      })(),
+      (async () => {
+        try {
+          const histRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}/history`);
+          if (histRes.ok) {
+            predictionHistory = await histRes.json();
+          }
+        } catch (e) {
+          console.error('Error fetching prediction history:', e);
+        }
+      })(),
+      drawChart('1D')
+    ]);
   } catch (err) {
     console.error('Error fetching stock details:', err);
     showStockPageError();
@@ -492,6 +495,8 @@ function updateNewsUI() {
 }
 
 // ── Chart.js API Connection ────────────────────────────────────
+const _chartCache = {};
+
 function getChartCtx() {
   let canvas = document.getElementById('mainChart');
   if (!canvas) {
@@ -504,86 +509,104 @@ function getChartCtx() {
   return canvas?.getContext('2d');
 }
 
+function showChartSkeleton() {
+  const chartBody = document.querySelector('.chart-card .chart-body');
+  if (chartBody) chartBody.innerHTML = window.HalalStocks.skeleton.chart('220px');
+}
+
 async function drawChart(period = '1D') {
   try {
+    // Render instantly from cache if we already fetched this period
+    if (_chartCache[period]) {
+      _renderChart(_chartCache[period], period);
+      return;
+    }
+
+    showChartSkeleton();
+
     const res = await fetch(`${window.HalalStocks.API_BASE}/stocks/${symbol}/history?period=${period}`);
     if (!res.ok) return;
 
     const dataObj = await res.json();
     const history = dataObj.history;
+    _chartCache[period] = history;
 
-    const labels = history.map(item => {
-      const date = new Date(item.date);
-      if (period === '1D') {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
-      return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    });
-
-    const prices = history.map(item => item.close);
-    const isUp = prices[prices.length - 1] >= prices[0];
-    const color = isUp ? '#10b981' : '#ef4444';
-
-    if (chart) chart.destroy();
-    const ctx = getChartCtx();
-    if (!ctx) return;
-
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: prices,
-          borderColor: color,
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 5,
-          pointHoverBackgroundColor: color,
-          fill: true,
-          backgroundColor: (ctx2) => {
-            const gradient = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, isUp ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)');
-            gradient.addColorStop(1, 'rgba(0,0,0,0)');
-            return gradient;
-          },
-          tension: 0.2,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        animation: { duration: 400 },
-        interaction: { intersect: false, mode: 'index' },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#0a1628',
-            borderColor: 'rgba(99,179,237,0.2)',
-            borderWidth: 1,
-            titleColor: '#94a3b8',
-            bodyColor: '#e2e8f0',
-            bodyFont: { family: 'JetBrains Mono' },
-            callbacks: {
-              label: (item) => ' $' + item.raw.toFixed(2)
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(255,255,255,0.02)', drawBorder: false },
-            ticks: { color: '#64748b', font: { size: 10, family: 'JetBrains Mono' }, maxTicksLimit: 7 }
-          },
-          y: {
-            position: 'right',
-            grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
-            ticks: { color: '#64748b', font: { size: 10, family: 'JetBrains Mono' }, callback: v => '$' + v.toFixed(2) }
-          }
-        }
-      }
-    });
+    _renderChart(history, period);
   } catch (err) {
     console.error('Error drawing chart:', err);
   }
+}
+
+function _renderChart(history, period) {
+  const labels = history.map(item => {
+    const date = new Date(item.date);
+    if (period === '1D') {
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  });
+
+  const prices = history.map(item => item.close);
+  const isUp = prices[prices.length - 1] >= prices[0];
+  const color = isUp ? '#10b981' : '#ef4444';
+
+  if (chart) chart.destroy();
+  const ctx = getChartCtx();
+  if (!ctx) return;
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: prices,
+        borderColor: color,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: color,
+        fill: true,
+        backgroundColor: (ctx2) => {
+          const gradient = ctx2.chart.ctx.createLinearGradient(0, 0, 0, 200);
+          gradient.addColorStop(0, isUp ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)');
+          gradient.addColorStop(1, 'rgba(0,0,0,0)');
+          return gradient;
+        },
+        tension: 0.2,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 300 },
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0a1628',
+          borderColor: 'rgba(99,179,237,0.2)',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#e2e8f0',
+          bodyFont: { family: 'JetBrains Mono' },
+          callbacks: {
+            label: (item) => ' $' + item.raw.toFixed(2)
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.02)', drawBorder: false },
+          ticks: { color: '#64748b', font: { size: 10, family: 'JetBrains Mono' }, maxTicksLimit: 7 }
+        },
+        y: {
+          position: 'right',
+          grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+          ticks: { color: '#64748b', font: { size: 10, family: 'JetBrains Mono' }, callback: v => '$' + v.toFixed(2) }
+        }
+      }
+    }
+  });
 }
 
 window.setPeriod = function(period, el) {
@@ -653,10 +676,8 @@ window.addToWatchlist = async function() {
 
 // ── Init ──────────────────────────────────────────────────────
 loadStockDetails();
-if (ctx) drawChart('1D');
 
-// Refetch details periodically
+// Refresh timestamp every minute (no need to re-run full ML/prediction pipeline)
 setInterval(() => {
-  loadStockDetails();
   updateTimestamp();
-}, 10000);
+}, 60000);
