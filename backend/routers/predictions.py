@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from typing import List
-
+from typing import List, Optional
 
 from backend.database import get_db
 from backend.models.prediction import Prediction
@@ -14,108 +14,105 @@ from backend.services.ensemble import get_ensemble_prediction
 
 router = APIRouter(prefix="/predictions", tags=["predictions"])
 
+# ---------------------------------------------------------------------------
+# Admin / GitHub Actions bulk-update endpoint
+# ---------------------------------------------------------------------------
+
+def _require_api_key(x_api_key: Optional[str] = Header(None)):
+    expected = os.getenv("PREDICTIONS_API_KEY")
+    if not expected or x_api_key != expected:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API key"
+        )
+
+@router.post("/bulk-update", status_code=status.HTTP_200_OK)
+def bulk_update_predictions(
+    items: List[dict],
+    db: Session = Depends(get_db),
+    _: None = Depends(_require_api_key)
+):
+    """Bulk insert/update predictions from the GitHub Actions ML pipeline."""
+    if not items:
+        return {"saved": 0}
+
+    saved = 0
+    for item in items:
+        symbol = item.get("symbol", "").upper().strip()
+        if not symbol:
+            continue
+
+        pred = Prediction(
+            symbol=symbol,
+            verdict=item.get("verdict"),
+            confidence=item.get("confidence"),
+            lstm_score=item.get("lstm_score"),
+            sentiment=item.get("sentiment"),
+            shariah_score=item.get("shariah_score"),
+            ensemble=item.get("ensemble"),
+            target_bull=item.get("target_bull"),
+            target_bear=item.get("target_bear"),
+            details=item.get("details"),
+            created_at=datetime.utcnow()
+        )
+        db.add(pred)
+        saved += 1
+
+    db.commit()
+    return {"saved": saved}
+
+
+# ---------------------------------------------------------------------------
+# Public endpoints (read cached predictions only — no ML inference here)
+# ---------------------------------------------------------------------------
+
+def _latest_prediction(db: Session, symbol: str):
+    return db.query(Prediction).filter(
+        Prediction.symbol == symbol.upper()
+    ).order_by(Prediction.created_at.desc()).first()
+
+
 @router.get("/{symbol}", response_model=PredictionOut)
 def get_prediction(symbol: str, db: Session = Depends(get_db)):
     symbol_upper = symbol.upper().strip()
-    
-    # Check DB cache for a recent prediction (created within last 24 hours)
-    cache_cutoff = datetime.utcnow() - timedelta(hours=24)
-    cached = db.query(Prediction).filter(
-        Prediction.symbol == symbol_upper,
-        Prediction.created_at >= cache_cutoff
-    ).order_by(Prediction.created_at.desc()).first()
 
-    if cached:
-        return cached
+    # Return the latest cached prediction. The ML pipeline is now run offline
+    # by GitHub Actions, so we never trigger heavy model inference on Render.
+    cached = _latest_prediction(db, symbol_upper)
 
-    # Run the real ensemble prediction pipeline
-    try:
-        ensemble_result = get_ensemble_prediction(symbol_upper)
-    except Exception as e:
-        print(f"[predictions] Ensemble prediction failed for {symbol_upper}: {e}")
+    if not cached:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI prediction service temporarily unavailable for {symbol_upper}."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No prediction available for {symbol_upper} yet. Run is scheduled daily."
         )
 
-    # Save to database cache
-    # Fetch previous prediction first to check if verdict changed
-    prev_pred = db.query(Prediction).filter(Prediction.symbol == symbol_upper).order_by(Prediction.created_at.desc()).first()
-
-    new_pred = Prediction(
-        symbol=symbol_upper,
-        verdict=ensemble_result["verdict"],
-        confidence=ensemble_result["confidence"],
-        lstm_score=ensemble_result["lstm_score"],
-        sentiment=ensemble_result["sentiment_score"],
-        shariah_score=ensemble_result["shariah_score"],
-        ensemble=ensemble_result["ensemble_score"]
-    )
-    db.add(new_pred)
-    db.commit()
-    db.refresh(new_pred)
-
-    # Check if verdict changed and send alerts
-    if prev_pred and prev_pred.verdict != new_pred.verdict:
-        from backend.models.watchlist import Watchlist
-        from backend.models.user import User
-        from backend.services.auth import send_simulated_email
-
-        subscribers = db.query(User).join(Watchlist, Watchlist.user_id == User.id).filter(
-            Watchlist.symbol == symbol_upper,
-            Watchlist.email_alerts == True
-        ).all()
-
-        for sub in subscribers:
-            alert_body = f"""Assalamu Alaikum {sub.full_name},
-
-This is an automated alert from HalalEdge. 
-
-The AI Verdict for your watchlisted stock {symbol_upper} has changed:
-
-Previous Verdict: {prev_pred.verdict}
-New AI Verdict: {new_pred.verdict} (Ensemble Score: {new_pred.ensemble}%, Confidence: {new_pred.confidence}%)
-
-You can view the detailed breakdown including LSTM price target and FinBERT news sentiment at:
-http://localhost:5500/stock.html?sym={symbol_upper}
-
-Regards,
-The HalalEdge AI Engine
-"""
-            send_simulated_email(
-                sub.email,
-                f"HalalEdge Alert: {symbol_upper} Verdict Changed to {new_pred.verdict}",
-                alert_body
-            )
-
-    return new_pred
+    return cached
 
 
 @router.get("/{symbol}/details", response_model=PredictionDetailOut)
-def get_prediction_details(symbol: str):
-    """Return full breakdown of the ensemble prediction with all component details."""
+def get_prediction_details(symbol: str, db: Session = Depends(get_db)):
     symbol_upper = symbol.upper().strip()
 
-    try:
-        ensemble_result = get_ensemble_prediction(symbol_upper)
-    except Exception as e:
-        print(f"[predictions] Detail prediction failed for {symbol_upper}: {e}")
+    cached = _latest_prediction(db, symbol_upper)
+    if not cached:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"AI prediction service temporarily unavailable for {symbol_upper}."
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No prediction details available for {symbol_upper} yet."
         )
+
+    details = cached.details or {}
 
     return PredictionDetailOut(
         symbol=symbol_upper,
-        verdict=ensemble_result["verdict"],
-        confidence=ensemble_result["confidence"],
-        lstm_score=ensemble_result["lstm_score"],
-        sentiment_score=ensemble_result["sentiment_score"],
-        shariah_score=ensemble_result["shariah_score"],
-        ensemble_score=ensemble_result["ensemble_score"],
-        technical_indicators=ensemble_result.get("technical_indicators", {}),
-        lstm_details=ensemble_result.get("lstm_details", {}),
-        sentiment_details=ensemble_result.get("sentiment_details", {}),
+        verdict=cached.verdict or "HOLD",
+        confidence=cached.confidence or 0,
+        lstm_score=cached.lstm_score or 0,
+        sentiment_score=cached.sentiment or 0,
+        shariah_score=cached.shariah_score or 0,
+        ensemble_score=cached.ensemble or 0,
+        technical_indicators=details.get("technical_indicators", {}),
+        lstm_details=details.get("lstm_details", {}),
+        sentiment_details=details.get("sentiment_details", {}),
     )
 
 
@@ -133,41 +130,35 @@ def get_shariah_detail(symbol: str, db: Session = Depends(get_db)):
     if cached:
         return cached
 
-    # Run check
-    shariah_res = run_shariah_check(symbol_upper)
-
-    # Save or update cache in DB
-    cached_db = db.query(ShariahCache).filter(ShariahCache.symbol == symbol_upper).first()
-    if cached_db:
-        cached_db.status = shariah_res["status"]
-        cached_db.score = shariah_res["score"]
-        cached_db.debt_ratio = shariah_res["debt_ratio"]
-        cached_db.haram_revenue = shariah_res["haram_revenue"]
-        cached_db.business_type = shariah_res["business_type"]
-        cached_db.updated_at = datetime.utcnow()
-        db.commit()
-        db.refresh(cached_db)
-        return cached_db
-    else:
-        new_cache = ShariahCache(
-            symbol=symbol_upper,
-            status=shariah_res["status"],
-            score=shariah_res["score"],
-            debt_ratio=shariah_res["debt_ratio"],
-            haram_revenue=shariah_res["haram_revenue"],
-            business_type=shariah_res["business_type"]
+    # Run Shariah check (this is lightweight; no heavy ML)
+    try:
+        result = run_shariah_check(symbol_upper)
+    except Exception as e:
+        print(f"[predictions] Shariah check failed for {symbol_upper}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=f"Shariah check temporarily unavailable for {symbol_upper}."
         )
-        db.add(new_cache)
-        db.commit()
-        db.refresh(new_cache)
-        return new_cache
 
-@router.get("/{symbol}/history", response_model=List[PredictionOut])
+    shariah_cache = ShariahCache(
+        symbol=symbol_upper,
+        status=result.get("status", "Doubtful"),
+        score=result.get("score", 50),
+        debt_ratio=result.get("debt_ratio", 0.0),
+        haram_revenue=result.get("haram_revenue", 0.0),
+        business_type=result.get("business_type", "Unknown"),
+    )
+    db.add(shariah_cache)
+    db.commit()
+    db.refresh(shariah_cache)
+    return shariah_cache
+
+
+@router.get("/{symbol}/history")
 def get_prediction_history(symbol: str, db: Session = Depends(get_db)):
-    """Return historical cached predictions for a given stock symbol to track accuracy."""
+    """Return the last 30 predictions for a symbol (for the stock detail page)."""
     symbol_upper = symbol.upper().strip()
-    history = db.query(Prediction).filter(
+    predictions = db.query(Prediction).filter(
         Prediction.symbol == symbol_upper
-    ).order_by(Prediction.created_at.desc()).limit(10).all()
-    return history
-
+    ).order_by(Prediction.created_at.desc()).limit(30).all()
+    return predictions

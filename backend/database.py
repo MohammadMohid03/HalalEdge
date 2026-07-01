@@ -31,6 +31,36 @@ except Exception as e:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+# Lightweight startup migrations for columns added after initial deployment
+# so existing Render Postgres tables stay compatible without manual ALTER TABLE.
+def _run_startup_migrations():
+    try:
+        with engine.begin() as conn:
+            if engine.url.drivername.startswith("postgresql"):
+                conn.execute(text("""
+                    ALTER TABLE predictions
+                    ADD COLUMN IF NOT EXISTS target_bull DOUBLE PRECISION,
+                    ADD COLUMN IF NOT EXISTS target_bear DOUBLE PRECISION,
+                    ADD COLUMN IF NOT EXISTS details JSONB
+                """))
+            elif engine.url.drivername.startswith("sqlite"):
+                conn.execute(text("""
+                    ALTER TABLE predictions
+                    ADD COLUMN IF NOT EXISTS target_bull REAL
+                """))
+                conn.execute(text("""
+                    ALTER TABLE predictions
+                    ADD COLUMN IF NOT EXISTS target_bear REAL
+                """))
+                conn.execute(text("""
+                    ALTER TABLE predictions
+                    ADD COLUMN IF NOT EXISTS details TEXT
+                """))
+    except Exception as e:
+        print(f"[database] Startup migration skipped/already-applied: {e}")
+
+_run_startup_migrations()
+
 def get_db():
     db = SessionLocal()
     try:

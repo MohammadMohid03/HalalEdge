@@ -1,0 +1,69 @@
+name: Daily AI Predictions Update
+
+on:
+  # Run every day at 06:00 UTC (after market close for US equities)
+  schedule:
+    - cron: '0 6 * * *'
+
+  # Allow manual trigger from the Actions tab
+  workflow_dispatch:
+
+# Prevent concurrent runs from stepping on each other
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  update-predictions:
+    name: Predict batch ${{ matrix.batch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    strategy:
+      fail-fast: false
+      matrix:
+        batch: [0, 1, 2, 3]
+        include:
+          - batch: 0
+            offset: 0
+          - batch: 1
+            offset: 50
+          - batch: 2
+            offset: 100
+          - batch: 3
+            offset: 150
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Wake up Render backend
+        run: |
+          echo "Pinging Render to wake up the service..."
+          curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://halaledge.onrender.com/ || true
+          echo "Waiting 45s for Render to finish starting..."
+          sleep 45
+
+      - name: Run prediction pipeline (batch ${{ matrix.batch }})
+        env:
+          PREDICTIONS_API_KEY: ${{ secrets.PREDICTIONS_API_KEY }}
+          API_BASE: ${{ secrets.API_BASE || 'https://halaledge.onrender.com/api' }}
+          MAX_SYMBOLS: 200
+          BATCH_SIZE: 50
+        run: |
+          python scripts/update_predictions.py \
+            --offset ${{ matrix.offset }} \
+            --limit 50 \
+            --max-symbols 200 \
+            --batch-size 50

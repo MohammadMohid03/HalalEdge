@@ -206,7 +206,7 @@ async function loadStockDetails() {
     // Show loading state for AI prediction
     showPredictionLoading();
 
-    // 2. Fetch AI Predictions
+    // 2. Fetch AI Predictions (cached, generated offline by GitHub Actions)
     try {
       const predRes = await fetch(`${window.HalalStocks.API_BASE}/predictions/${symbol}`, {
         headers: window.HalalStocks.getAuthHeaders()
@@ -214,9 +214,11 @@ async function loadStockDetails() {
       if (predRes.ok) {
         aiPrediction = await predRes.json();
         updatePredictionUI();
+      } else if (predRes.status === 404) {
+        showPredictionError('AI prediction is scheduled. The daily pipeline will generate it soon.');
       } else {
         const errorData = await predRes.json().catch(() => ({}));
-        showPredictionError(errorData.detail || 'Failed to generate prediction.');
+        showPredictionError(errorData.detail || 'Failed to load prediction.');
       }
     } catch (e) {
       console.error('Error fetching prediction:', e);
