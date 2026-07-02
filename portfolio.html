@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-    if (!localStorage.getItem('token')) {
-      window.location.replace('login.html');
-    }
-  </script>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>My Portfolio — HalalEdge</title>
   <style>html { background: #03080f; }</style>
@@ -14,6 +9,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
+
+<!-- Auth gate loading screen: shown while checking login state -->
+<div id="authGate" style="position:fixed;inset:0;z-index:9999;background:#03080f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.25rem">
+  <div class="ai-spinner" style="width:44px;height:44px;border:3px solid rgba(14,165,233,0.15);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite"></div>
+  <div style="font-family:var(--font-display);font-weight:600;color:var(--white);font-size:1rem">Securing your portfolio…</div>
+</div>
+<script>
+  (function() {
+    if (!localStorage.getItem('token')) {
+      window.location.replace('login.html');
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        const gate = document.getElementById('authGate');
+        if (gate) gate.remove();
+      });
+    }
+  })();
+</script>
 <nav class="navbar">
   <a href="index.html" class="nav-logo"><div class="logo-icon">☽</div><span>Halal<span class="accent">Edge</span></span></a>
   <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="screener.html">Screener</a></li><li><a href="portfolio.html" class="active">Portfolio</a></li><li><a href="learn.html">Learn</a></li><li><a href="about.html">About</a></li></ul>
