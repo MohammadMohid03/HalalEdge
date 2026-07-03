@@ -20,7 +20,8 @@ import sys
 import time
 import argparse
 import requests
-from typing import List, Dict
+import math
+from typing import List, Dict, Any
 
 # Add repository root so we can import backend modules
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,13 +47,26 @@ DEFAULT_SYMBOLS = [
     "SPGI", "BLK", "BX", "GS", "MS", "SCHW", "C", "BAC", "WFC", "USB",
     "AXP", "COF", "CME", "ICE", "MCO", "FIS", "VRSK", "INFO", "TRV", "AON",
     "MMC", "AJG", "PGR", "ALL", "HIG", "MET", "PRU", "AFL", "AIG", "BRK-B",
-    "T", "VZ", "TMUS", "CMCSA", "CHTR", "DISH", "LUMN", "NWSA", "FOXA", "TRI",
-    "OMC", "IPG", "WPP", "GOOG", "META", "TT", "ITW", "HON", "UPS", "FDX",
+    "T", "VZ", "TMUS", "CMCSA", "CHTR", "NWSA", "FOXA", "TRI",
+    "OMC", "IPG", "WPP", "GOOG", "TT", "ITW", "HON", "UPS", "FDX",
     "CSX", "UNP", "NSC", "LMT", "NOC", "RTX", "GD", "TDG", "HEI", "TXT",
     "DE", "AGCO", "CNHI", "PCAR", "OSK", "CMI", "ETN", "EMR", "ROK", "AME",
     "PH", "SWK", "SNA", "FAST", "GWW", "MSC", "DOV", "IEX", "PNR", "ITT",
-    "XYL", "AQUA", "WAT", "TMO", "DHR", "ABT", "BMY", "MRK", "LLY", "VRTX",
+    "XYL", "AQUA", "WAT", "TMO", "DHR", "BMY", "MRK", "LLY", "VRTX",
 ]
+
+
+def _sanitize_floats(obj: Any) -> Any:
+    """Replace NaN / Infinity values with None so JSON serialization works."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, dict):
+        return {k: _sanitize_floats(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_sanitize_floats(v) for v in obj]
+    return obj
 
 
 def get_symbols(max_symbols: int) -> List[str]:
@@ -95,11 +109,14 @@ def post_batch(batch: List[Dict], retries: int = 3) -> bool:
     if not API_KEY:
         raise RuntimeError("PREDICTIONS_API_KEY environment variable is not set")
 
+    # Sanitize any NaN/Infinity floats before JSON serialization
+    clean_batch = _sanitize_floats(batch)
+
     for attempt in range(1, retries + 1):
         try:
             resp = requests.post(
                 BULK_UPDATE_URL,
-                json=batch,
+                json=clean_batch,
                 headers={"X-API-Key": API_KEY, "Content-Type": "application/json"},
                 timeout=120,
             )
