@@ -57,11 +57,14 @@ DEFAULT_SYMBOLS = [
 
 
 def _sanitize_floats(obj: Any) -> Any:
-    """Replace NaN / Infinity values with None so JSON serialization works."""
-    if isinstance(obj, float):
+    """Replace NaN / Infinity values (including numpy floats) with None."""
+    try:
         if math.isnan(obj) or math.isinf(obj):
             return None
         return obj
+    except TypeError:
+        pass
+
     if isinstance(obj, dict):
         return {k: _sanitize_floats(v) for k, v in obj.items()}
     if isinstance(obj, list):
