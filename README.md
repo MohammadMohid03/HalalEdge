@@ -14,6 +14,12 @@
   An intelligent stock screening platform combining <strong>AI-driven price prediction</strong>, <strong>sentiment analysis</strong>, and <strong>Shariah compliance filtering</strong> for Muslim investors.
 </p>
 
+<p align="center">
+  <img src="app_images/dashboard-overview.jpeg" alt="Dashboard overview" width="31%">
+  <img src="app_images/screening-results.jpeg" alt="Screening results" width="31%">
+  <img src="app_images/portfolio-view.jpeg" alt="Portfolio view" width="31%">
+</p>
+
 ---
 
 ## ✨ Features
